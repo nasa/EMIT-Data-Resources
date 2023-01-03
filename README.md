@@ -20,9 +20,9 @@ The EMIT Project delivers space-based measurements of surface mineralogy of the 
 
 + [L2A Algorithm Theoretical Basis Document](https://lpdaac.usgs.gov/documents/1571/EMITL2A_ATBD_v1.pdf)  
 
-+ [LP DAAC Product Pages](https://lpdaac.usgs.gov/product_search/?query=emit&status=Operational&view=cards&sort=title)  
++ [EMIT LP DAAC Product Pages](https://lpdaac.usgs.gov/product_search/?query=emit&status=Operational&view=cards&sort=title) - Learn more about available EMIT products  
 
-+ [Earth Data Search - EMIT](https://search.earthdata.nasa.gov/search?q=%22EMIT%22)  
++ [EMIT on Earth Data Search](https://search.earthdata.nasa.gov/search?q=%22EMIT%22) - Find EMIT Data  
 
 ## Contact Info:  
 
