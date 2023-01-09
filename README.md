@@ -66,7 +66,7 @@ After copying the repository you can execute the python script, providing the `-
 
 ### **Tutorial Notebooks**  
 
-1. Exploring EMIT L2A Reflectance
+1. Exploring EMIT L2A Reflectance  
     1.1 Setup  
     1.2 Opening and Understanding File Structure  
     1.3 Plotting Spectra Basics  
