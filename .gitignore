@@ -1,0 +1,6 @@
+*.ipynb_checkpoints
+*.nc*
+/data/example_out.csv
+/data/isla_gaviota_3.geojson
+/ignore
+*__pycache__*

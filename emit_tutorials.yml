@@ -1,0 +1,52 @@
+name: emit_tutorials
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - pangeo-notebook
+  - boto3
+  - rioxarray
+  - xarray
+  - xarray-spatial
+  - h5netcdf
+  - netcdf4
+  - h5py~=3.2
+  - gdal~=3.3
+  - libgdal
+  - geoviews
+  - matplotlib-base
+  - seaborn
+  - intake
+  - hvplot~=0.7
+  - pyproj
+  - bqplot
+  - geopandas
+  - zarr
+  - cartopy
+  - pynco
+  - rasterio
+  - shapely
+  - pyresample
+  - icepyx
+  - joblib
+  - pystac-client
+  - pydap
+  - lxml
+  - ipyleaflet
+  - sidecar
+  - jupyterlab-geojson
+  - jupyterlab-git
+  - jupyter-resource-usage
+  - ipympl
+  - conda-lock
+  - pooch
+  - rasterstats
+  - kerchunk
+  - rechunker
+  - pqdm
+  - coiled
+  - s3fs
+  - pip
+platforms:
+  - linux-64
+  - osx-64
