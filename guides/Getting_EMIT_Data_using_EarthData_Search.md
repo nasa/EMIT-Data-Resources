@@ -1,9 +1,8 @@
 # Getting Started with Earth Surface Mineral Dust Source Investigation (EMIT) data in Earthdata Search
 
----
 **Note:** Users must have [NASA Earthdata Login](https://urs.earthdata.nasa.gov/home) to download data
 
-## Step 1. Go to Earthdata Search and Login
+## Step 1. Go to [Earthdata Search](https://search.earthdata.nasa.gov/search) and Login
 
 Click **Earthdata Login** in the upper right portion of the Earthdata Search Landing Page
 
@@ -11,10 +10,9 @@ Enter your Earthdata Login credentials (username/password)
 
 ![Earthdata Landing Page](https://i.imgur.com/CMzS6kA.jpeg)
 
-
 ## Step 2. Finding EMIT Data
 
-1. In the top left poriton of the screen type in "EMIT" (quotes must be used in order to perform the search). This will search for all EMIT products the LP DAAC manages.
+1. In the top left poriton of the screen type in "EMIT" (quotes will limit results to an exact match). This will search for all available EMIT collections.
 
 ![Earthdata Landing Page](https://i.imgur.com/UeuG3bd.jpeg)
 
@@ -61,5 +59,14 @@ The **Download Files** tab provides the *https://* links for downloading the fil
 
 The **AWS S3 Access** tab provides the  *s3://* links, which is what we would use to access the data directly in region (us-west-2) within the AWS cloud.
 
+---
 
-[def]: ScreenshotStep1.png
+## Contact Info:  
+
+Email: LPDAAC@usgs.gov  
+Voice: +1-866-573-3222  
+Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
+Website: <https://lpdaac.usgs.gov/>  
+Date last modified: 01-11-2023  
+
+¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
