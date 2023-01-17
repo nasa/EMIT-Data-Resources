@@ -45,7 +45,7 @@ This repository requires that users set up a compatible Python environment and d
 
 ## Helpful Links  
 
-+ [EMIT Website](https://earth.jpl.nasa.gov/emit/)  
++ [JPL EMIT Website](https://earth.jpl.nasa.gov/emit/)  
 
 + [EMIT Github Repository](https://github.com/emit-sds) - Main EMIT Repository  
 
