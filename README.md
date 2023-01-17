@@ -5,6 +5,11 @@ Welcome to the EMIT-Data-Resources repository. This repository provides guides, 
 These guides, how-tos, and tutorials can also be found in the [EMIT Tutorials Repository](https://github.com/emit-sds/tutorials)
 
 ---
+## Fridays in February 2023 Upcoming Workshop Series!
+
+Please join use February 3, 10, and 17th from 1:00 - 3:00pm EST. to learn about working with EMIT radiance and relfectance products. Sign up for the workshop [here](https://tinyurl.com/2tp3cx3t)
+
+---
 
 ## EMIT Background  
 
