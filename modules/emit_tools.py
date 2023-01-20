@@ -84,7 +84,7 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
         out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
        
         # Mask Fill Values
-        out_xr = out_xr.where(out_xr[var] != fill_value)
+        out_xr[var] = out_xr[var].where(out_xr[var] != fill_value)
         
         return out_xr  
     
@@ -145,7 +145,7 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     """
     
     # Build Output Dataset
-    out_ds = np.zeros((glt_array.shape[0], glt_array.shape[1], ds_array.shape[-1]), dtype=np.float32) + fill_value
+    out_ds = np.full((glt_array.shape[0], glt_array.shape[1], ds_array.shape[-1]), fill_value, dtype=np.float32)
     valid_glt = np.all(glt_array != GLT_NODATA_VALUE, axis=-1)
     
     # Adjust for One based Index
