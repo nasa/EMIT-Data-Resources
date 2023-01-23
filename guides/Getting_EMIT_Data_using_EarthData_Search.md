@@ -31,7 +31,7 @@ To view the scenes and location, click on the image to focus it on the map the l
 
 ![Earthdata Landing Page](https://i.imgur.com/YjcAZvU.png)
 
-2. If you are interested in only a singular scene, click the download arrow on the card (or list row) for the select scene. You will then be able to download the select files related to that image.
+2. If you are interested in only a single scene, click the download arrow on the card (or list row) for the select scene. You will then be able to download the select files related to that image.
 
 ![Earthdata Landing Page](https://i.imgur.com/cdOsgm3.png)
 
