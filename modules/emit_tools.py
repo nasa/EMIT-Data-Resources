@@ -91,8 +91,8 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
     # Non-Orthorectified
     else:
         # Building Flat Dataset from Components
-        data_vars = {**ds.variables, **loc.variables, **wvl.variables} 
-        coords = {**ds.coords}
+        data_vars = {**ds.variables, **loc.variables} 
+        coords = {'downtrack':(['downtrack'], ds.downtrack.data),'crosstrack':(['crosstrack'],ds.crosstrack.data), **wvl.variables}
         out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
         
         # Apply Quality and Band Masks
