@@ -57,7 +57,11 @@ The final page of instructions show the download links for data access in the cl
 
 The **Download Files** tab provides the *https://* links for downloading the files locally
 
-The **AWS S3 Access** tab provides the  *s3://* links, which is what we would use to access the data directly in region (us-west-2) within the AWS cloud.
+The **AWS S3 Access** tab provides the  *s3://* links, which is what we would use to access the data directly in region (us-west-2) within the AWS cloud.  
+
+---
+
+**Please visit our [FAQ](https://forum.earthdata.nasa.gov/) page if you have general questions or visit on the [Earthdata Forum](https://forum.earthdata.nasa.gov/) to ask your own question.**
 
 ---
 

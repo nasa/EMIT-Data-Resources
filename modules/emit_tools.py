@@ -62,7 +62,9 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
 
             # Apply GLT to dataset
             out_ds = apply_glt(raw_ds,glt_ds)
-        
+
+            del raw_ds
+            del glt_ds
             #Update variables
             data_vars = {var:(['latitude','longitude','bands'], out_ds)}
         
@@ -75,6 +77,7 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
         # Build Output xarray Dataset and assign data_vars array attributes
         out_xr = xr.Dataset(data_vars=data_vars, coords=coords, attrs=ds.attrs)
         
+        del out_ds
         # Assign Attributes from Original Datasets
         out_xr[var].attrs = ds[var].attrs
         out_xr.coords['latitude'].attrs = loc['lon'].attrs
@@ -91,8 +94,8 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
     # Non-Orthorectified
     else:
         # Building Flat Dataset from Components
-        data_vars = {**ds.variables, **loc.variables, **wvl.variables} 
-        coords = {**ds.coords}
+        data_vars = {**ds.variables, **loc.variables} 
+        coords = {'downtrack':(['downtrack'], ds.downtrack.data),'crosstrack':(['crosstrack'],ds.crosstrack.data), **wvl.variables}
         out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
         
         # Apply Quality and Band Masks
