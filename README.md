@@ -1,14 +1,22 @@
-# EMIT-Data-Resources
+# EMIT Data Tutorials Workshop - February 2023
+
+>**This branch of the repository is specifically for the EMIT Data Tutorials Workshops hosted February 3, 10, and 17th from 1:00 - 3:00pm EST and is designed specifically for the cloud computing instance used during weeks 2 and 3. If you want to work through the content in this repo locally, please clone the main branch. This workshop branch will remain available to launch the cloud instance if you are a participant and want to revisit it.**
+
+[Workshop Sign-up Page](https://tinyurl.com/2tp3cx3t)
+
+To launch the Openscapes 2i2c cloud computing instance, please click the link below and select ______.
+
+[Launch Workshop Cloud Instance]()  
+
+> Running multiple notebooks simultaneously or in a row may result in an error due to shared resources on the cloud instance. If this happens, using the menu bar at the top of your browser, go to Kernel > Shut down all kernels... Then close and reopen the notebook you are working on. This will shut down any kernels remaining in the background that are using memory.
+
+---  
+
+## EMIT-Data-Resources  
 
 Welcome to the EMIT-Data-Resources repository. This repository provides guides, short how-tos, and tutorials to help users access and work with data from the Earth Surface Mineral Dust Source Investigation (EMIT) mission. In the interest of open science this repository has been made public but is still under active development. All jupyter notebooks and scripts should be functional, however, changes or additions may be made. Contributions from all parties are welcome.
 
-> Please note that EMIT data files are large and orthorectification expands their size. If using an Openscapes 2i2c JupyterLab instance please select a Large size server.
-
----
-
-## Fridays in February 2023 Upcoming Workshop Series!
-
-Please join us February 3, 10, and 17th from 1:00 - 3:00pm EST. to learn about working with EMIT radiance and relfectance products. Sign up for the workshop [here](https://tinyurl.com/2tp3cx3t).
+> Please note that EMIT data files are large and orthorectification expands their size. 
 
 ---
 
