@@ -87,7 +87,7 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
         out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
        
         # Mask Fill Values
-        out_xr[var] = out_xr[var].where(out_xr[var] != fill_value)
+        out_xr[var].data[out_xr[var].data == fill_value] = np.nan
         
         return out_xr  
     
