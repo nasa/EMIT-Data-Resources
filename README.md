@@ -8,7 +8,7 @@ To launch the Openscapes 2i2c cloud computing instance, please click the link be
 
 > Running multiple notebooks simultaneously or in a row may result in an error due to shared resources on the cloud instance. If this happens, using the menu bar at the top of your browser, go to Kernel > Shut down all kernels... This will shut down any kernels remaining in the background that are using memory.
 
-[Launch Workshop Cloud Instance]() 
+[Launch Workshop Cloud Instance](https://openscapes.2i2c.cloud/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fnasa%2FEMIT-Data-Resources&urlpath=lab%2Ftree%2FEMIT-Data-Resources%2F&branch=emit_workshop_feb2023)  
 
 ![Server Selection Figure](./data/figures/server_selection.png)
 
