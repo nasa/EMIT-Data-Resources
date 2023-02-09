@@ -42,23 +42,25 @@ Content in this repository is divided into 3 categories:
 
 Web viewable Resources in markdown format that walk through a task:  
 
-+ Getting EMIT Data using EarthData Search - A thourough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data.
++ [Getting EMIT Data using EarthData Search](/guides/Getting_EMIT_Data_using_EarthData_Search.md) - A thourough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data.
 
 ### **2. How-To Notebooks**
 
 Short jupyter notebooks that explain how to complete a task:  
 
-+ How to Convert to ENVI Format - Convert from downloaded netCDF4 (.nc) format to .envi format.
-+ How to Orthorectify - Use the geometry lookup table (GLT) included with the EMIT netCDF4 file to project on a geospatial grid (EPSG:4326).
-+ How to Extract Point Data  - Extract spectra using lat/lon coordinates from a .csv and build a dataframe/.csv output.
-+ How to Extract Area Data - Clip to/extract an area defined by a .geojson or shapefile.
-+ How to use EMIT Quality Data - Build a mask using bands from  an EMIT L2A Mask file and apply it to an L2A Reflectance file.
++ [How to Convert to ENVI Format](/how-tos/How_to_Convert_to_ENVI.ipynb) - Convert from downloaded netCDF4 (.nc) format to .envi format.
++ [How to Orthorectify](/how-tos/How_to_Orthorectify.ipynb) - Use the geometry lookup table (GLT) included with the EMIT netCDF4 file to project on a geospatial grid (EPSG:4326).
++ [How to Extract Point Data](/how-tos/How_to_Extract_Points.ipynb)  - Extract spectra using lat/lon coordinates from a .csv and build a dataframe/.csv output.
++ [How to Extract Area Data](/how-tos/How_to_Extract_Area.ipynb) - Clip to/extract an area defined by a .geojson or shapefile.
++ [How to use EMIT Quality Data](/how-tos/How_to_use_EMIT_Quality_data.ipynb) - Build a mask using an EMIT L2A Mask file and apply it to an L2A Reflectance file.
++ [How to use Direct S3 Access with EMIT](/how-tos/How_to_Direct_S3_Access.ipynb) - Use S3 from inside us-west2 to access EMIT Data.
++ [How to find EMIT Data using NASA's CMR API](/how-tos/How_to_find_EMIT_data_using_CMR_API.ipynb) - Use NASA's CMR API to programatically find EMIT Data.
 
 ### **3. Tutorial Notebooks**  
 
 Longer jupyter notebooks that walk through a process or concept:  
 
-+ 01 Exploring EMIT L2A Reflectance  
++ [Exploring EMIT L2A Reflectance](/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb) - Explore EMIT L2A Reflectance data using interactive plots.
 
 ---
 
@@ -86,6 +88,6 @@ Email: LPDAAC@usgs.gov
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 01-20-2023  
+Date last modified: 02-09-2023  
 
 ¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
