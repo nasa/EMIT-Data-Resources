@@ -4,11 +4,12 @@ like opening and flattening the data to work in xarray, orthorectification, and 
 
 Author: Erik Bolch, ebolch@contractor.usgs.gov 
 
-Last Updated: 01/17/2022
+Last Updated: 02/16/2022
 
 TO DO: 
-- Include orthorectification of elevation as separate function
+- Fix elevation orthorectification - all values end up as -9999
 - Investigate reducing memory usage
+- Test/Improve flexibility for applying the GLT to modified datasets
 """
 # Packages used
 import netCDF4 as nc
@@ -19,7 +20,7 @@ import pandas as pd
 import xarray as xr
 import rasterio as rio
 
-def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODATA_VALUE=0, fill_value = -9999): 
+def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None): 
     """
         This function utilizes other functions in this module to streamline opening an EMIT dataset as an xarray.Dataset.
         
@@ -28,8 +29,6 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
         ortho: True or False, whether to orthorectify the dataset or leave in crosstrack/downtrack coordinates.
         qmask: a numpy array output from the quality_mask function used to mask pixels based on quality flags selected in that function. Any non-orthorectified array with the proper crosstrack and downtrack dimensions can also be used.
         unpacked_bmask: a numpy array from  the band_mask function that can be used to mask band-specific pixels that have been interpolated.
-        GLT_NODATA_VALUE: no data value for the GLT tables, 0 by default
-        fill_value: the fill value for EMIT datasets, -9999 by default
                         
         Returns:
         out_xr: an xarray.Dataset constructed based on the parameters provided.
@@ -38,75 +37,26 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None, GLT_NODAT
     # Read in Data as Xarray Datasets
     ds = xr.open_dataset(filepath,engine = 'h5netcdf')
     loc = xr.open_dataset(filepath, engine = 'h5netcdf', group='location')
-    wvl = xr.open_dataset(filepath, engine = 'h5netcdf', group='sensor_band_parameters')
+    wvl = xr.open_dataset(filepath, engine = 'h5netcdf', group='sensor_band_parameters') 
     
-    # List Root Dataset Variables
-    var_list = list(ds.variables)
-
-    # Orthorectify
+    # Building Flat Dataset from Components
+    data_vars = {**ds.variables} 
+    coords = {'downtrack':(['downtrack'], ds.downtrack.data),'crosstrack':(['crosstrack'],ds.crosstrack.data), **loc.variables, **wvl.variables}
+    out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
+    # Apply Quality and Band Masks
+    if qmask is not None:
+        out_xr[ds.variables[0]].values[qmask == 1] = np.nan
+    if unpacked_bmask is not None:
+        out_xr[ds.variables[0]].values[unpacked_bmask == 1] = np.nan               
+    
     if ortho is True:
-        # Define GLT Dataset
-        glt_ds = np.nan_to_num(np.stack([loc['glt_x'].data,loc['glt_y'].data],axis=-1),nan=GLT_NODATA_VALUE).astype(int)
-        
-        # Define Rawspace Dataset Variable Values (Typically Reflectance)    
-        for var in var_list:
-            raw_ds = ds[var].data
-
-            # Apply quality mask if Included
-            if qmask is not None:
-                raw_ds[qmask == 1] = fill_value
-        
-            # Apply band_mask if included
-            if unpacked_bmask is not None:
-                raw_ds[unpacked_bmask == 1] = fill_value
-
-            # Apply GLT to dataset
-            out_ds = apply_glt(raw_ds,glt_ds)
-
-            del raw_ds
-            del glt_ds
-            #Update variables
-            data_vars = {var:(['latitude','longitude','bands'], out_ds)}
-        
-        # Calculate Lat and Lon Vectors
-        lon, lat = coord_vects(ds,loc) # Reorder this function to make sense in case of multiple variables
-    
-        # Create Coordinate Dictionary
-        coords = {'latitude':(['latitude'],lat), 'longitude':(['longitude'],lon), **wvl.variables}# unpack wvl to complete coordinates dictionary
-        
-        # Build Output xarray Dataset and assign data_vars array attributes
-        out_xr = xr.Dataset(data_vars=data_vars, coords=coords, attrs=ds.attrs)
-        
-        del out_ds
-        # Assign Attributes from Original Datasets
-        out_xr[var].attrs = ds[var].attrs
-        out_xr.coords['latitude'].attrs = loc['lon'].attrs
-        out_xr.coords['longitude'].attrs = loc['lat'].attrs
-        
-        # Add Spatial Reference in recognizable format
-        out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
-       
-        # Mask Fill Values
-        out_xr[var].data[out_xr[var].data == fill_value] = np.nan
-        
-        return out_xr  
-    
-    # Non-Orthorectified
-    else:
-        # Building Flat Dataset from Components
-        data_vars = {**ds.variables, **loc.variables} 
-        coords = {'downtrack':(['downtrack'], ds.downtrack.data),'crosstrack':(['crosstrack'],ds.crosstrack.data), **wvl.variables}
-        out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
-        
-        # Apply Quality and Band Masks
-        if qmask is not None:
-            out_xr[var_list[0]].values[qmask == 1] = np.nan
-        if unpacked_bmask is not None:
-            out_xr[var_list[0]].values[unpacked_bmask == 1] = np.nan               
+       out_xr = ortho_xr(out_xr)
+          
     return out_xr
 
+
 # Function to Calculate the Lat and Lon Vectors/Coordinate Grid
-def coord_vects(ds,loc):
+def coord_vects(ds):
     """
     This function calculates the Lat and Lon Coordinate Vectors using the GLT and Metadata from an EMIT dataset read into xarray.
     
@@ -121,8 +71,8 @@ def coord_vects(ds,loc):
     # Retrieve Geotransform from Metadata
     GT = ds.geotransform
     # Create Array for Lat and Lon and fill
-    dim_x = loc.glt_x.shape[1]
-    dim_y = loc.glt_x.shape[0]
+    dim_x = ds.glt_x.shape[1]
+    dim_y = ds.glt_x.shape[0]
     lon = np.zeros(dim_x)
     lat = np.zeros(dim_y)
     # Note: no rotation for EMIT Data
@@ -146,7 +96,7 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     Returns: 
     out_ds: a numpy array of orthorectified data.
     """
-    
+
     # Build Output Dataset
     out_ds = np.full((glt_array.shape[0], glt_array.shape[1], ds_array.shape[-1]), fill_value, dtype=np.float32)
     valid_glt = np.all(glt_array != GLT_NODATA_VALUE, axis=-1)
@@ -155,6 +105,77 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     glt_array[valid_glt] -= 1 
     out_ds[valid_glt, :] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0], :]
     return out_ds
+
+def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
+    """
+    This function applies the GLT to variables within an EMIT dataset that has been read into the format provided in by the emit_xarray function.
+
+    Parameters:
+    ds: an xarray dataset produced by emit_xarray
+    GLT_NODATA_VALUE: no data value for the GLT tables, 0 by default
+    fill_value: the fill value for EMIT datasets, -9999 by default
+
+    Returns:
+    ortho_ds: an orthocorrected xarray dataset.  
+    
+    """
+    # Build glt_ds
+
+    glt_ds = np.nan_to_num(np.stack([ds['glt_x'].data,ds['glt_y'].data],axis=-1),nan=GLT_NODATA_VALUE).astype(int)  
+    
+
+    # List Variables
+    var_list = list(ds.data_vars)
+    
+    # Create empty dictionary for orthocorrected data vars
+    data_vars = {}   
+
+    # Extract Rawspace Dataset Variable Values (Typically Reflectance)    
+    for var in var_list:
+        raw_ds = ds[var].data
+
+        # Apply GLT to dataset
+        out_ds = apply_glt(raw_ds,glt_ds)
+
+        del raw_ds
+        #Update variables
+        data_vars[var] = (['latitude','longitude','bands'], out_ds)
+    
+    # Calculate Lat and Lon Vectors
+    lon, lat = coord_vects(ds) # Reorder this function to make sense in case of multiple variables
+
+    # Apply GLT to elevation
+    #elev_ds = apply_glt(ds['elev'].data[:,:,np.newaxis],glt_ds)
+    
+    # Delete glt_ds - no longer needed
+    del glt_ds
+    
+    # Create Coordinate Dictionary
+    coords = {'latitude':(['latitude'],lat), 'longitude':(['longitude'],lon), **ds.coords}# unpack to add appropriate coordinates 
+    
+    # Remove Unnecessary Coords
+    for key in ['downtrack','crosstrack','lat','lon','glt_x','glt_y','elev']:
+        del coords[key]
+    
+    # Add Orthocorrected Elevation
+    #coords['elev'] = (['latitude','longitude'], np.squeeze(elev_ds))
+
+    # Build Output xarray Dataset and assign data_vars array attributes
+    out_xr = xr.Dataset(data_vars=data_vars, coords=coords, attrs=ds.attrs)
+    
+    del out_ds
+    # Assign Attributes from Original Datasets
+    out_xr[var].attrs = ds[var].attrs
+    out_xr.coords['latitude'].attrs = ds['lon'].attrs
+    out_xr.coords['longitude'].attrs = ds['lat'].attrs
+    
+    # Add Spatial Reference in recognizable format
+    out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
+
+    # Mask Fill Values
+    out_xr[var].data[out_xr[var].data == fill_value] = np.nan
+    
+    return out_xr  
 
 def quality_mask(filepath, quality_bands):
     """
@@ -204,81 +225,3 @@ def band_mask(filepath):
     unpacked_bmask = unpacked_bmask[:,:,0:285]
     # Check for data bands and build mask
     return(unpacked_bmask)
-
-#######################################################################################
-#### Below here is under development/unused/not working
-#######################################################################################
-#def point_extract(point_df,xarray_dataset):
-    """
-    This function extracts the lat and lon coordinates of a pandas dataframe from an EMIT xarray.Dataset using a 'nearest' method.
-
-    Parameters:
-    point_df: a pandas dataframe containing 'Latitude' and 'Longitude' columns.
-    xarray_dataset: and EMIT dataset read in as an xarray.Dataset using the emit_xarray function.
-
-    Returns: 
-    out_df: a pandas dataframe containing columns from the input dataframe and the extracted variable values (i.e. reflectance).
-    """
-    # This could be improved by allowing for different variations of lat/lon
-
-    # Select Pixels closest to Lat/Lon coordinates Provided and convert to dataframe.
-    ex_df = xarray_dataset.sel(latitude=point_df.Latitude.to_xarray(),longitude=point_df.Longitude.to_xarray(),
-                                         method='nearest').to_dataframe()
-    # Pivot to wide-form of variable and create column headings from wavelengths
-    ex_df = ex_df.pivot_tab+le(index=['index'],columns=['wavelengths'],values=['reflectance'])
-    # Rename/Flatten Column Names
-    colnames = []
-    for col in ex_df.columns.values.tolist():
-        name = '_'.join(map(str,col))
-        colnames.append(name)
-    ex_df.columns = colnames
-    # Join original dataframe with extracted values
-    out_df = point_df.join(ex_df)
-    return(out_df)
-
-#def area_extract(area_gpd,xarray_dataset):
-    """
-    This function extracts the area of a single polygon in a geopandas dataframe from an EMIT xarray.Dataset.
-
-    Parameters:
-    point_df: a pandas dataframe containing 'Latitude' and 'Longitude' columns.
-    xarray_dataset: and EMIT dataset read in as an xarray.Dataset using the emit_xarray function.
-
-    Returns: 
-    out_df: a pandas dataframe containing columns from the input dataframe and the extracted variable values (i.e. reflectance).
-    """
-
-#def elev(filepath, GLT_NODATA_VALUE=0):
-    """
-    This function orthorectifies the elevation and returns an xarray dataset.
-
-    Parameters:
-    filepath: path to EMIT .nc file
-
-    Returns: 
-    elev_xr: an xarray.Dataset containing the geolocated EMIT dataset and metadata
-    """
-    ds = xr.open_dataset(filepath, engine = 'h5netcdf')
-    loc = xr.open_dataset(filepath, engine = 'h5netcdf', group='location')
-
-    # Define GLT Dataset
-    glt_ds = np.nan_to_num(np.stack([loc['glt_x'].data,loc['glt_y'].data],axis=-1),nan=GLT_NODATA_VALUE).astype(int)
-    
-    # Apply GLT
-    elev_ds = apply_glt(loc['elev'].data[:,:,np.newaxis],glt_ds)
-    
-    # Calculate Lat and Lon Vectors
-    lon, lat = coord_vects(ds,loc) # Reorder this function to make sense in case of multiple variables
-    
-    # Create Variables Dictionary
-    elev_data_vars = {'elev':(['latitude','longitude'],np.squeeze(elev_ds))} 
-    
-    # Create Coordinate Dictionary  
-    coords = {'latitude':(['latitude'],lat), 'longitude':(['longitude'],lon)}# unpack wvl to complete coordinates dictionary
-
-    # Create Xarray Dataset         
-    elev_xr = xr.Dataset(data_vars=elev_data_vars, coords=coords, attrs= ds.attrs)
-    
-    # Copy Attributes
-    elev_xr['elev'].attrs = loc['elev'].attrs
-    return elev_xr
