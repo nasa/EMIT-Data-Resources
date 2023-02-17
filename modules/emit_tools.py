@@ -43,11 +43,12 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None):
     data_vars = {**ds.variables} 
     coords = {'downtrack':(['downtrack'], ds.downtrack.data),'crosstrack':(['crosstrack'],ds.crosstrack.data), **loc.variables, **wvl.variables}
     out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
+    
     # Apply Quality and Band Masks
     if qmask is not None:
-        out_xr[ds.variables[0]].values[qmask == 1] = np.nan
+        out_xr[list(out_xr.data_vars)[0]].values[qmask == 1] = np.nan
     if unpacked_bmask is not None:
-        out_xr[ds.variables[0]].values[unpacked_bmask == 1] = np.nan               
+        out_xr[list(out_xr.data_vars)[0]].values[unpacked_bmask == 1] = np.nan               
     
     if ortho is True:
        out_xr = ortho_xr(out_xr)
