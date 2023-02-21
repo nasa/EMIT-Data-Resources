@@ -1,20 +1,6 @@
-# EMIT Data Tutorials Workshop - February 2023
+# EMIT-Data-Resources
 
->**This branch of the repository is specifically for the EMIT Data Tutorials Workshops hosted February 3, 10, and 17th from 1:00 - 3:00pm EST and is designed specifically for the cloud computing instance used during weeks 2 and 3. If you want to work through the content in this repo locally, please clone the main branch. This workshop branch will remain available to launch the cloud instance if you are a participant and want to revisit it.**
-
-[Workshop Sign-up Page](https://tinyurl.com/2tp3cx3t)
-
-To launch the Openscapes 2i2c cloud computing instance, please click the link below and select a `Large: up to 64 CPU/512 GB RAM with a Python Image and Node Share: ~2CPU, ~16GB RAM. This will automatically configure your space with the needed environment and repository for the workshop, no completion of prerequisite tasks or setup will be necessary.
-
-> Running multiple notebooks simultaneously or in a row may result in an error due to shared resources on the cloud instance. If this happens, using the menu bar at the top of your browser, go to Kernel > Shut down all kernels... This will shut down any kernels remaining in the background that are using memory.
-
-[Launch Workshop Cloud Instance](https://openscapes.2i2c.cloud/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fnasa%2FEMIT-Data-Resources&urlpath=lab%2Ftree%2FEMIT-Data-Resources%2F&branch=emit_workshop_feb2023)  
-
-![Server Selection Figure](./data/figures/server_selection.png)
-
----  
-
-## EMIT-Data-Resources  
+>**This version of the workshop is designed to be completed locally. If you want use the cloud workspace to revisit the EMIT Data Tutorials Workshops hosted February 3, 10, and 17th 2023, clone the emit_workshop_feb2023 branch. The workshop branch will remain available.**
 
 Welcome to the EMIT-Data-Resources repository. This repository provides guides, short how-tos, and tutorials to help users access and work with data from the Earth Surface Mineral Dust Source Investigation (EMIT) mission. In the interest of open science this repository has been made public but is still under active development. All jupyter notebooks and scripts should be functional, however, changes or additions may be made. Contributions from all parties are welcome.
 
@@ -88,6 +74,6 @@ Email: LPDAAC@usgs.gov
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 02-09-2023  
+Date last modified: 02-21-2023  
 
 ¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
