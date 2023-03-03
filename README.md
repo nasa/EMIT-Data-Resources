@@ -67,6 +67,8 @@ Longer jupyter notebooks that walk through a process or concept:
 
 + [L2A Algorithm Theoretical Basis Document](https://lpdaac.usgs.gov/documents/1571/EMITL2A_ATBD_v1.pdf)  
 
++ [EMIT on Slack]( https://forms.gle/XefLVG6e6A7ezwpY9) - Join the EMIT slack community!
+
 
 
 
