@@ -54,6 +54,11 @@ Longer jupyter notebooks that walk through a process or concept:
 
 + [JPL EMIT Website](https://earth.jpl.nasa.gov/emit/)  
 
++ [LP DAAC EMIT Product Pages](https://lpdaac.usgs.gov/product_search/?query=emit&status=Operational&view=cards&sort=title) - Learn more about available EMIT products  
++ [VISIONS Open Data Portal](https://earth.jpl.nasa.gov/emit/data/data-portal/coverage-and-forecasts/) - Learn about current and forecatsed EMIT coverage  
+
++ [EMIT on Earth Data Search](https://search.earthdata.nasa.gov/search?q=%22EMIT%22) - Download EMIT Data from NASA 
+
 + [EMIT Github Repository](https://github.com/emit-sds) - Main EMIT Repository  
 
 + [EMIT Utilities Github Repository](https://github.com/emit-sds/emit-utils) - General convenience utilities for working with EMIT data
@@ -62,9 +67,12 @@ Longer jupyter notebooks that walk through a process or concept:
 
 + [L2A Algorithm Theoretical Basis Document](https://lpdaac.usgs.gov/documents/1571/EMITL2A_ATBD_v1.pdf)  
 
-+ [EMIT LP DAAC Product Pages](https://lpdaac.usgs.gov/product_search/?query=emit&status=Operational&view=cards&sort=title) - Learn more about available EMIT products  
++ [EMIT on Slack]( https://forms.gle/XefLVG6e6A7ezwpY9) - Join the EMIT slack community!
 
-+ [EMIT on Earth Data Search](https://search.earthdata.nasa.gov/search?q=%22EMIT%22) - Find EMIT Data  
+
+
+
+
 
 ---
 
