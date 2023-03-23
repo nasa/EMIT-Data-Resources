@@ -22,6 +22,7 @@ import math
 import pandas as pd
 import xarray as xr
 import rasterio as rio
+import s3fs
 
 def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None): 
     """
@@ -46,7 +47,10 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None):
     data_vars = {**ds.variables} 
     coords = {'downtrack':(['downtrack'], ds.downtrack.data),'crosstrack':(['crosstrack'],ds.crosstrack.data), **loc.variables, **wvl.variables}
     out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
-    out_xr.attrs['granule_id'] = os.path.splitext(os.path.basename(filepath))[0]
+    if type(filepath) == s3fs.core.S3File:
+        out_xr.attrs['granule_id'] = filepath.info()['name'].split('/',-1)[-1].split('.',-1)[0]
+    else:
+        out_xr.attrs['granule_id'] = os.path.splitext(os.path.basename(filepath))[0]
     
     # Apply Quality and Band Masks
     if qmask is not None:
@@ -139,13 +143,13 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     # Extract Rawspace Dataset Variable Values (Typically Reflectance)    
     for var in var_list:
         raw_ds = ds[var].data
-
+        var_dims = ds[var].dims
         # Apply GLT to dataset
         out_ds = apply_glt(raw_ds,glt_ds)
 
         del raw_ds
         #Update variables
-        data_vars[var] = (['latitude','longitude','bands'], out_ds)
+        data_vars[var] = (['latitude','longitude', var_dims[-1]], out_ds)
     
     # Calculate Lat and Lon Vectors
     lon, lat = coord_vects(ds) # Reorder this function to make sense in case of multiple variables
