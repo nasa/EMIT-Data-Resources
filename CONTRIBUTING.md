@@ -68,3 +68,6 @@ Once you've identified something you'd like to help with you're ready to make a 
 For accepting new contributions, TOPS uses the [forking workflow](https://guides.github.com/activities/forking/). As the first step of your contribution, you'll want to fork this repository, make a local clone of it, add your contribution, and then create a pull request back to the TOPS repository.  
 
 All documentation should be written using Markdown and Github Markdown-supported HTML.  
+
+## Attribution
+These contributing guidelines are adapted from the NASA Transform to Open Science github, available at https://github.com/nasa/Transform-to-Open-Science/blob/main/CONTRIBUTING.md.
