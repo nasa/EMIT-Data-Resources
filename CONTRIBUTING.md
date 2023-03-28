@@ -1,21 +1,21 @@
 # Contributing to Our GitHub
 
-This page is your one-stop shop for uncovering the many resources for open science that are on the TOPS GitHub! Read on to learn more about how to use our GitHub, how to engage with TOPS and participate in the Year of Open Science, and identify resources to help you, your research team, and your organization get started with open science.
+This page is your one-stop shop for uncovering how to contribute to our Github!
 
 ## We Want Your Help!
 
 No, really, we do! Please come and participate in our community and help us transform to open science together! 
 
-Depending on your level of interaction with TOPS and the TOPS GitHub, visitors to the site can be described as: 
-- A **community member**: anyone in the open science community who visits a TOPS site, utilizes TOPS online tools, or attends a TOPS event.
+Depending on your level of interaction with the Land Processes Data Active Archive Center (LP DAAC) and the LP DAAC GitHub, visitors to the site can be described as: 
+- A **community member**: anyone in the open science community who visits a LP DAAC site, utilizes LP DAAC online tools, or attends a LP DAAC event.
 - A **participant**: anyone who posts a comment or poses a question in the *GitHub Discussion Space*, reports a site bug or requests a new resource in *GitHub Issues*, or attends a TOPS event and utilizes any virtual chat features during that event. 
 - A **contributor**: anyone who forks this GitHub repository and submits pull requests to make additions or changes to the posted content.
 
 Everyone reading this page is a community member, and we hope everyone will post comments and join discussions as a participant. Contributors are welcome, particularly to help find and point to other open science resources. 
 
 ## Ways to Contribute to the  GitHub
-There are three, major ways to contribute to the TOPS GitHub. 
-- **Ask a question, provide an answer, share your thoughts and contribute to brainstorming through [Discussions](https://github.com/nasa/Transform-to-Open-Science/discussions).** The GitHub discussion area is intended for general Q&A, asking for community stories and experiences, and beginning conversations on new or existing open science topics. 
+There are three, major ways to contribute to the LP DAAC GitHub. 
+- **Ask a question, provide an answer, share your thoughts and contribute to brainstorming through [Discussions]().** The GitHub discussion area is intended for general Q&A, asking for community stories and experiences, and beginning conversations on new or existing open science topics. 
   - To learn more about GitHub Discussions check out their [documentation](https://docs.github.com/en/discussions/collaborating-with-your-community-using-discussions/about-discussions) 
 - **Suggest a change, addition, or deletion to what is already on the GitHub using [Issues](https://github.com/nasa/Transform-to-Open-Science/issues).** Issues can be about any TOPS plans, timelines, and content. 
      - Before submitting a new [issue](https://github.com/nasa/Transform-to-Open-Science/issues), check to make sure [a similar issue isn't already open](https://github.com/nasa/Transform-to-Open-Science/issues?q=is%3Aopen+is%3Aissue). If one is, contribute to that issue thread with your feedback.
@@ -34,7 +34,7 @@ There are three, major ways to contribute to the TOPS GitHub.
 In the spirit of open source software, everyone is encouraged to help improve this project!
                                                                
 ## New to GitHub? Start here!
-You can [sign up for GitHub here](https://github.com/)! TOPS has created a short video demonstrating how to make an easy pull request [here](https://youtu.be/PHoScPeMWHI).
+You can [sign up for GitHub here](https://github.com/)! The NASA Transform to Open Science Team has made a short video demonstrating how to make an easy pull request [here](https://youtu.be/PHoScPeMWHI).
 
 For a more in-depth start, we suggest *[Getting Started with Git and GitHub: The Complete Beginner’s Guide](https://towardsdatascience.com/getting-started-with-git-and-github-6fcd0f2d4ac6)* and *[The Beginners Guide to Git and GitHub](https://www.freecodecamp.org/news/the-beginners-guide-to-git-github/)*. We've summarized some of the most important points below.
 
@@ -65,7 +65,7 @@ Once you've identified something you'd like to help with you're ready to make a 
 
 ## Development Model
 
-For accepting new contributions, TOPS uses the [forking workflow](https://guides.github.com/activities/forking/). As the first step of your contribution, you'll want to fork this repository, make a local clone of it, add your contribution, and then create a pull request back to the TOPS repository.  
+For accepting new contributions, TOPS uses the [forking workflow](https://guides.github.com/activities/forking/). As the first step of your contribution, you'll want to fork this repository, make a local clone of it, add your contribution, and then create a pull request back to the LP DAAC repository.  
 
 All documentation should be written using Markdown and Github Markdown-supported HTML.  
 
