@@ -12,7 +12,7 @@ _________________________________________________________________________
 > - CONTRIBUTING.md
 > - LICENSE.md
 > ### Changed
-> - 
+> - content in CHANGE_LOG.md
 > ### Fixed
 > - 
  
