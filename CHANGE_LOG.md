@@ -8,6 +8,9 @@ _________________________________________________________________________
   
 > ### Added
 > - CHANGE_LOG.md
+> - CODE_OF_CONDUCT.md
+> - CONTRIBUTING.md
+> - LICENSE.md
 > ### Changed
 > - 
 > ### Fixed
