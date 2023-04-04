@@ -116,6 +116,27 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     out_ds[valid_glt, :] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0], :]
     return out_ds
 
+def apply_glt_2d(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
+    """
+    This function applies a numpy array of the EMIT glt to a numpy array of the desired 2d dataset (i.e. lat, lon, elev, etc. 
+    
+    Parameters:
+    ds_array: numpy array of the desired variable
+    glt_array: a GLT array constructed from EMIT GLT data
+    
+    Returns: 
+    out_ds: a numpy array of orthorectified data.
+    """
+
+    # Build Output Dataset
+    out_ds = np.full((glt_array.shape[0], glt_array.shape[1]), fill_value, dtype=np.float32)
+    valid_glt = np.all(glt_array != GLT_NODATA_VALUE, axis=-1)
+    
+    # Adjust for One based Index
+    glt_array[valid_glt] -= 1 
+    out_ds[valid_glt] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0]]
+    return out_ds
+
 def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     """
     This function applies the GLT to variables within an EMIT dataset that has been read into the format provided in by the emit_xarray function.
