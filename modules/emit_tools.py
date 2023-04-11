@@ -87,10 +87,10 @@ def coord_vects(ds):
     lat = np.zeros(dim_y)
     # Note: no rotation for EMIT Data
     for x in np.arange(dim_x):
-        x_geo = GT[0] + x * GT[1]
+        x_geo = (GT[0]+0.5*GT[1]) + x * GT[1] # Adjust coordinates to pixel-center
         lon[x] = x_geo
     for y in np.arange(dim_y):
-        y_geo = GT[3] + y * GT[5]
+        y_geo = (GT[3]+0.5*GT[5]) + y * GT[5]
         lat[y] = y_geo
     return lon,lat
 
@@ -166,7 +166,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
         raw_ds = ds[var].data
         var_dims = ds[var].dims
         # Apply GLT to dataset
-        out_ds = apply_glt(raw_ds,glt_ds)
+        out_ds = apply_glt(raw_ds,glt_ds, GLT_NODATA_VALUE=GLT_NODATA_VALUE)
 
         del raw_ds
         #Update variables
