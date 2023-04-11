@@ -4,11 +4,11 @@ like opening and flattening the data to work in xarray, orthorectification, and 
 
 Author: Erik Bolch, ebolch@contractor.usgs.gov 
 
-Last Updated: 02/16/2022
+Last Updated: 04/11/2023
 
 TO DO: 
 - Add units to metadata for ENVI header
-- Fix elevation orthorectification - all values end up as -9999
+- Fix elevation orthorectification - use 2d glt? all values end up as -9999
 - Investigate reducing memory usage
 - Test/Improve flexibility for applying the GLT to modified datasets
 """
@@ -87,10 +87,10 @@ def coord_vects(ds):
     lat = np.zeros(dim_y)
     # Note: no rotation for EMIT Data
     for x in np.arange(dim_x):
-        x_geo = GT[0] + x * GT[1]
+        x_geo = (GT[0]+0.5*GT[1]) + x * GT[1] # Adjust coordinates to pixel-center
         lon[x] = x_geo
     for y in np.arange(dim_y):
-        y_geo = GT[3] + y * GT[5]
+        y_geo = (GT[3]+0.5*GT[5]) + y * GT[5]
         lat[y] = y_geo
     return lon,lat
 
@@ -114,6 +114,27 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     # Adjust for One based Index
     glt_array[valid_glt] -= 1 
     out_ds[valid_glt, :] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0], :]
+    return out_ds
+
+def apply_glt_2d(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
+    """
+    This function applies a numpy array of the EMIT glt to a numpy array of the desired 2d dataset (i.e. lat, lon, elev, etc. 
+    
+    Parameters:
+    ds_array: numpy array of the desired variable
+    glt_array: a GLT array constructed from EMIT GLT data
+    
+    Returns: 
+    out_ds: a numpy array of orthorectified data.
+    """
+
+    # Build Output Dataset
+    out_ds = np.full((glt_array.shape[0], glt_array.shape[1]), fill_value, dtype=np.float32)
+    valid_glt = np.all(glt_array != GLT_NODATA_VALUE, axis=-1)
+    
+    # Adjust for One based Index
+    glt_array[valid_glt] -= 1 
+    out_ds[valid_glt] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0]]
     return out_ds
 
 def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
@@ -145,7 +166,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
         raw_ds = ds[var].data
         var_dims = ds[var].dims
         # Apply GLT to dataset
-        out_ds = apply_glt(raw_ds,glt_ds)
+        out_ds = apply_glt(raw_ds,glt_ds, GLT_NODATA_VALUE=GLT_NODATA_VALUE)
 
         del raw_ds
         #Update variables
@@ -376,3 +397,51 @@ def envi_header(inputpath):
     else:
         return inputpath + '.hdr'
 
+def raw_spatial_crop(ds, shape):
+    """
+    Use a polygon to clip the file GLT, then a bounding box to crop the spatially raw data. Regions clipped in the GLT are set to 0 so a mask will be applied when
+    used to orthorectify the data at a later point in a workflow.
+    Args:
+        ds: raw spatial EMIT data (non-orthorectified) opened with the `emit_xarray` function.
+        shape: a polygon opened with geopandas.
+    Returns:
+        clipped_ds: a clipped GLT and raw spatial data clipped to a bounding box.
+    
+    """
+    # Reformat the GLT
+    lon, lat = coord_vects(ds)
+    data_vars = {'glt_x':(['latitude','longitude'],ds.glt_x.data),'glt_y':(['latitude','longitude'],ds.glt_y.data)}
+    coords = {'latitude':(['latitude'],lat), 'longitude':(['longitude'],lon), 'ortho_y':(['latitude'],ds.ortho_y.data), 'ortho_x':(['longitude'],ds.ortho_x.data)}
+    attrs = ds.attrs
+    glt_ds = xr.Dataset(data_vars=data_vars, coords=coords, attrs=ds.attrs)
+    glt_ds.rio.write_crs(glt_ds.spatial_ref,inplace=True)
+    
+    # Clip the emit glt
+    clipped = glt_ds.rio.clip(shape.geometry.values,shape.crs, all_touched=True)
+    
+    # Pull new geotransform from clipped glt
+    clipped_gt = np.array([float(i) for i in clipped['spatial_ref'].GeoTransform.split(' ')]) # THIS GEOTRANSFORM IS OFF BY HALF A PIXEL
+    
+    # Shift Geotransform by half-pixel
+    clipped_gt[0] = clipped_gt[0]+(clipped_gt[1]/2)
+    clipped_gt[3] = clipped_gt[3]+(clipped_gt[5]/2)
+    
+    # Create Crosstrack and Downtrack masks for spatially raw dataset -1 on min is to account for 1 based index. May be a more robust way to do this exists
+    crosstrack_mask = (ds.crosstrack >= np.nanmin(clipped.glt_x.data)-1) & (ds.crosstrack <= np.nanmax(clipped.glt_x.data))
+    downtrack_mask = (ds.downtrack >= np.nanmin(clipped.glt_y.data)-1) & (ds.downtrack <= np.nanmax(clipped.glt_y.data))
+    
+    # Mask Areas outside of crosstrack and downtrack covered by the shape
+    clipped_ds = ds.where((crosstrack_mask & downtrack_mask), drop=True)
+    # Replace Full dataset geotransform with clipped geotransform
+    clipped_ds.attrs['geotransform'] = clipped_gt
+    
+    # Drop unnecessary vars from dataset
+    clipped_ds = clipped_ds.drop_vars(['glt_x','glt_y','downtrack','crosstrack'])
+    
+    # Re-index the GLT to the new array
+    glt_x_data = (clipped.glt_x.data-np.nanmin(clipped.glt_x))+1 # shift to 1 based index
+    glt_y_data = (clipped.glt_y.data-np.nanmin(clipped.glt_y))+1
+    clipped_ds = clipped_ds.assign_coords({'glt_x':(['ortho_y','ortho_x'],np.nan_to_num(glt_x_data)), 'glt_y':(['ortho_y','ortho_x'],np.nan_to_num(glt_y_data))})
+    clipped_ds = clipped_ds.assign_coords({'downtrack':(['downtrack'],np.arange(0,clipped_ds[list(ds.data_vars.keys())[0]].shape[0])),'crosstrack':(['crosstrack'],np.arange(0,clipped_ds[list(ds.data_vars.keys())[0]].shape[1]))})
+    
+    return clipped_ds
