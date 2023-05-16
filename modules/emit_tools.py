@@ -23,6 +23,7 @@ import pandas as pd
 import xarray as xr
 import rasterio as rio
 import s3fs
+from fsspec.implementations.http import HTTPFile
 
 def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None): 
     """
@@ -49,6 +50,8 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None):
     out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
     if type(filepath) == s3fs.core.S3File:
         out_xr.attrs['granule_id'] = filepath.info()['name'].split('/',-1)[-1].split('.',-1)[0]
+    elif type(filepath) == HTTPFile:
+        out_xr.attrs['granule_id'] = filepath.path.split('/',-1)[-1].split('.',-1)[0]
     else:
         out_xr.attrs['granule_id'] = os.path.splitext(os.path.basename(filepath))[0]
     
