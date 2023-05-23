@@ -183,14 +183,18 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     
     # Delete glt_ds - no longer needed
     del glt_ds
-    
+
     # Create Coordinate Dictionary
-    coords = {'latitude':(['latitude'],lat), 'longitude':(['longitude'],lon), **ds.coords}# unpack to add appropriate coordinates 
-    
-    # Remove Unnecessary Coords
-    for key in ['downtrack','crosstrack','lat','lon','glt_x','glt_y','elev']:
+    coords = {
+        'latitude': (['latitude'], lat),
+        'longitude': (['longitude'], lon),
+        'bands': ds.wavelengths.values,
+        **ds.coords
+    }
+
+    for key in ['downtrack', 'crosstrack', 'lat', 'lon', 'glt_x', 'glt_y', 'elev']:
         del coords[key]
-    
+
     # Add Orthocorrected Elevation
     #coords['elev'] = (['latitude','longitude'], np.squeeze(elev_ds))
 
