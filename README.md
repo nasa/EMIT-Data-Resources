@@ -22,31 +22,19 @@ This repository requires that users set up a compatible Python environment and d
 
 ## Repository Contents  
 
-Content in this repository is divided into 3 categories:  
+Below are the resource available for EMIT Data.
 
-### **1. Guides**  
-
-Web viewable Resources in markdown format that walk through a task:  
-
-+ [Getting EMIT Data using EarthData Search](/guides/Getting_EMIT_Data_using_EarthData_Search.md) - A thourough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data.
-
-### **2. How-To Notebooks**
-
-Short jupyter notebooks that explain how to complete a task:  
-
-+ [How to Convert to ENVI Format](/how-tos/How_to_Convert_to_ENVI.ipynb) - Convert from downloaded netCDF4 (.nc) format to .envi format.
-+ [How to Orthorectify](/how-tos/How_to_Orthorectify.ipynb) - Use the geometry lookup table (GLT) included with the EMIT netCDF4 file to project on a geospatial grid (EPSG:4326).
-+ [How to Extract Point Data](/how-tos/How_to_Extract_Points.ipynb)  - Extract spectra using lat/lon coordinates from a .csv and build a dataframe/.csv output.
-+ [How to Extract Area Data](/how-tos/How_to_Extract_Area.ipynb) - Clip to/extract an area defined by a .geojson or shapefile.
-+ [How to use EMIT Quality Data](/how-tos/How_to_use_EMIT_Quality_data.ipynb) - Build a mask using an EMIT L2A Mask file and apply it to an L2A Reflectance file.
-+ [How to use Direct S3 Access with EMIT](/how-tos/How_to_Direct_S3_Access.ipynb) - Use S3 from inside us-west2 to access EMIT Data.
-+ [How to find EMIT Data using NASA's CMR API](/how-tos/How_to_find_EMIT_data_using_CMR_API.ipynb) - Use NASA's CMR API to programatically find EMIT Data.
-
-### **3. Tutorial Notebooks**  
-
-Longer jupyter notebooks that walk through a process or concept:  
-
-+ [Exploring EMIT L2A Reflectance](/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb) - Explore EMIT L2A Reflectance data using interactive plots.
+|Name|Type|Summary|
+|:---|:---|:---|
+|[Getting EMIT Data using EarthData Search](guides/Getting_EMIT_Data_using_EarthData_Search.md)|Markdown Guide|A thourough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data|
+|[Exploring EMIT L2A Reflectance](python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb)|Jupyter Notebook|Explore EMIT L2A Reflectance data using interactive plots|
+|[How to Convert to ENVI Format](python/how-tos/How_to_Convert_to_ENVI.ipynb)|Jupyter Notebook|Convert from downloaded netCDF4 (.nc) format to .envi format|
+|[How to Orthorectify](python/how-tos/How_to_Orthorectify.ipynb)|Jupyter Notebook|Use the geometry lookup table (GLT) included with the EMIT netCDF4 file to project on a geospatial grid (EPSG:4326)|
+|[How to Extract Point Data](python/how-tos/How_to_Extract_Points.ipynb)|Jupyter Notebook|Extract spectra using lat/lon coordinates from a .csv and build a dataframe/.csv output|
+|[How to Extract Area Data](python/how-tos/How_to_Extract_Area.ipynb)|Jupyter Notebook|Clip to/extract an area defined by a .geojson or shapefile|
+|[How to use EMIT Quality Data](python/how-tos/How_to_use_EMIT_Quality_data.ipynb)|Jupyter Notebook|Build a mask using an EMIT L2A Mask file and apply it to an L2A Reflectance file|
+|[How to use Direct S3 Access with EMIT](python/how-tos/How_to_Direct_S3_Access.ipynb)|Jupyter Notebook|Use S3 from inside us-west2 to access EMIT Data|
+|[How to find EMIT Data using NASA's CMR API](python/how-tos/How_to_find_EMIT_data_using_CMR_API.ipynb)|Jupyter Notebook|Use NASA's CMR API to programatically find EMIT Data|
 
 ---
 
@@ -69,11 +57,6 @@ Longer jupyter notebooks that walk through a process or concept:
 
 + [EMIT on Slack]( https://forms.gle/XefLVG6e6A7ezwpY9) - Join the EMIT slack community!
 
-
-
-
-
-
 ---
 
 ## Contact Info:  
@@ -82,6 +65,6 @@ Email: LPDAAC@usgs.gov
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 02-21-2023  
+Date last modified: 05-18-2023  
 
 ¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
