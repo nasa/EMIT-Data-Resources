@@ -1,6 +1,6 @@
 # EMIT Data Tutorials Workshop - February 2023
 
->**This branch of the repository is specifically for the EMIT Data Tutorials Workshops hosted February 3, 10, and 17th from 1:00 - 3:00pm EST and is designed specifically for the cloud computing instance used during weeks 2 and 3. If you want to work through the content in this repo locally, please clone the main branch. This workshop branch will remain available to launch the cloud instance if you are a participant and want to revisit it.**
+>**This branch of the repository is specifically for the EMIT Data Tutorials Workshops hosted February 3, 10, and 17th 2023 from 1:00 - 3:00pm EST and is designed specifically for the cloud computing instance used during weeks 2 and 3. If you want to work through the content in this repo locally, please clone the main branch. This workshop branch will remain available to launch the cloud instance if you are a participant and want to revisit it. You can view recordings of the workshop [here](https://www.youtube.com/playlist?list=PLO2yB4LGNlWrC5NdxeHMxyAxdwQhSypXe) **
 
 [Workshop Sign-up Page](https://tinyurl.com/2tp3cx3t)
 
