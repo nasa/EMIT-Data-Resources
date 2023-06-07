@@ -200,8 +200,8 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     del out_ds
     # Assign Attributes from Original Datasets
     out_xr[var].attrs = ds[var].attrs
-    out_xr.coords['latitude'].attrs = ds['lon'].attrs
-    out_xr.coords['longitude'].attrs = ds['lat'].attrs
+    out_xr.coords['latitude'].attrs = ds['lat'].attrs
+    out_xr.coords['longitude'].attrs = ds['lon'].attrs
     
     # Add Spatial Reference in recognizable format
     out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
