@@ -8,19 +8,27 @@ This Python Environment will work for all of the guides, how-to's, and tutorials
 
 1. Using your preferred command line interface (command prompt, terminal, cmder, etc.) navigate to your local copy of the repository, then type the following to create a compatible Python environment.  
 
-    > `conda create -n emit_tutorials -c conda-forge --yes python=3.10 gdal=3.7.0 hvplot=0.8.4 geoviews=1.9.6 rioxarray rasterio jupyter geopandas earthaccess jupyter_bokeh h5netcdf spectral`
+    ```cmd
+    conda create -n emit_tutorials -c conda-forge --yes python=3.10 gdal=3.7.0 hvplot=0.8.4 geoviews=1.9.6 rioxarray rasterio jupyter geopandas earthaccess jupyter_bokeh h5py h5netcdf spectral
+    ```
 
 2. Next, activate the Python Environment that you just created.
 
-    > `conda activate emit_tutorials`  
+    ```cmd
+    conda activate emit_tutorials 
+    ```
 
 3. Now you can launch Jupyter Notebook to open the notebooks included.
 
-    > `jupyter notebook`  
+    ```cmd
+    jupyter notebook 
+    ```
 
 If you're having trouble creating a compatible Python Environment, you can also create one from the included `.yml` file. Using your preferred command line interface (command prompt, terminal, cmder, etc.) navigate to your local copy of the repository, then type the following to create a compatible Python environment using the `.yml` file.
 
-> `conda env create -f setup/emit_tutorials.yml`  
+```cmd
+conda env create -f setup/emit_tutorials.yml
+```
 
 After this, follow steps 2 and 3 above.
 
