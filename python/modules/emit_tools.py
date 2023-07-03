@@ -103,9 +103,9 @@ def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None):
     
     # Apply Quality and Band Masks, set fill values to NaN
     for var in list(ds.data_vars):
-        if qmask:
+        if qmask is not None:
             out_xr[var].data[qmask == 1] = np.nan
-        if unpacked_bmask:
+        if unpacked_bmask is not None:
             out_xr[var].data[unpacked_bmask == 1] = np.nan               
         out_xr[var].data[out_xr[var].data == -9999] = np.nan
     
