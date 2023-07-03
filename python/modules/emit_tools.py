@@ -221,7 +221,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
 
     # Apply GLT to elevation
     elev_ds = apply_glt(ds['elev'].data,glt_ds)
-    #elev_ds[elev_ds==fill_value] = np.nan
+    elev_ds[elev_ds==fill_value] = np.nan
     
     # Delete glt_ds - no longer needed
     del glt_ds
