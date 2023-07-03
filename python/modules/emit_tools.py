@@ -101,18 +101,19 @@ def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None):
         else:
             out_xr = out_xr.swap_dims({'bands':band})
     
-    # Apply Quality and Band Masks
-    if qmask:
-        out_xr[list(out_xr.data_vars)[0]].values[qmask == 1] = np.nan
-    if unpacked_bmask:
-        out_xr[list(out_xr.data_vars)[0]].values[unpacked_bmask == 1] = np.nan               
+    # Apply Quality and Band Masks, set fill values to NaN
+    for var in list(ds.data_vars):
+        if qmask:
+            out_xr[var].data[qmask == 1] = np.nan
+        if unpacked_bmask:
+            out_xr[var].data[unpacked_bmask == 1] = np.nan               
+        out_xr[var].data[out_xr[var].data == -9999] = np.nan
     
     if ortho is True:
        out_xr = ortho_xr(out_xr)
        out_xr.attrs['Orthorectified'] = 'True'
               
     return out_xr
-
 
 # Function to Calculate the Lat and Lon Vectors/Coordinate Grid
 def coord_vects(ds):
@@ -250,7 +251,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
 
     # Mask Fill Values
-    #out_xr[var].data[out_xr[var].data == fill_value] = np.nan
+    out_xr[var].data[out_xr[var].data == fill_value] = np.nan
     
     return out_xr  
 
@@ -396,6 +397,10 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
         if 'Orthorectified' in xr_ds.attrs.keys() and xr_ds.attrs['Orthorectified'] == 'True':
             metadata['coordinate system string']= csstring
             metadata['map info'] = mapinfo
+        
+        # Replace NaN values in each layer with fill_value
+        xr_ds[var].data[xr_ds[var].data == np.nan] = -9999
+        
         # Write Variables as ENVI Output
         envi_ds = envi.create_image(envi_header(output_name), metadata, ext=extension, force=overwrite)
         mm = envi_ds.open_memmap(interleave='bip', writable=True)   
