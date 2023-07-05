@@ -17,7 +17,6 @@ TO DO:
 # Packages used
 import netCDF4 as nc
 import os
-import warnings
 from spectral.io import envi
 from osgeo import gdal
 import numpy as np
@@ -28,7 +27,7 @@ import rasterio as rio
 import s3fs
 from fsspec.implementations.http import HTTPFile
 
-def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None): 
+def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None, flat_field=False): 
     """
         This function utilizes other functions in this module to streamline opening an EMIT dataset as an xarray.Dataset.
         
@@ -37,6 +36,7 @@ def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None):
         ortho: True or False, whether to orthorectify the dataset or leave in crosstrack/downtrack coordinates.
         qmask: a numpy array output from the quality_mask function used to mask pixels based on quality flags selected in that function. Any non-orthorectified array with the proper crosstrack and downtrack dimensions can also be used.
         unpacked_bmask: a numpy array from  the band_mask function that can be used to mask band-specific pixels that have been interpolated.
+        flat_field: for radiance product, apply the flat-field correction if applicable.
                         
         Returns:
         out_xr: an xarray.Dataset constructed based on the parameters provided.
@@ -109,6 +109,10 @@ def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None):
             out_xr[var].data[unpacked_bmask == 1] = np.nan               
         out_xr[var].data[out_xr[var].data == -9999] = np.nan
     
+    if 'radiance' in list(out_xr.data_vars) and flat_field is True :
+        out_xr['radiance'].data = out_xr['radiance'].data*out_xr['flat_field_update'].data
+        out_xr = out_xr.drop_vars('flat_field_update')
+
     if ortho is True:
        out_xr = ortho_xr(out_xr)
        out_xr.attrs['Orthorectified'] = 'True'
@@ -191,7 +195,6 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     
     # Remove flat field from data vars (Radiance only, should be applied before orthorectifiaction)
     if 'flat_field_update' in var_list:
-        warnings.warn('Warning: Removed flat field from variables. Apply flat field correction before orthorectifying if you intend to.')
         var_list.remove('flat_field_update')
     
     # Create empty dictionary for orthocorrected data vars
@@ -399,7 +402,7 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
             metadata['map info'] = mapinfo
         
         # Replace NaN values in each layer with fill_value
-        xr_ds[var].data[xr_ds[var].data == np.nan] = -9999
+        np.nan_to_num(xr_ds[var].data, copy=False, nan=-9999)
         
         # Write Variables as ENVI Output
         envi_ds = envi.create_image(envi_header(output_name), metadata, ext=extension, force=overwrite)
