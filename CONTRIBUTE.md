@@ -1,134 +1,68 @@
+# Contributing to Our GitHub
 
-# Contributor Code of Conduct
+This page is your one-stop shop for uncovering how to contribute to our Github!
 
-## Our Pledge
+## We Want Your Help!
 
-We as members, contributors, and leaders pledge to make participation in our
-community a harassment-free experience for everyone, regardless of age, body
-size, visible or invisible disability, ethnicity, sex characteristics, gender
-identity and expression, level of experience, education, socio-economic status,
-nationality, personal appearance, race, caste, color, religion, or sexual
-identity and orientation.
+No, really, we do! Please come and participate in our community and lets do science together! Depending on your level of interaction with the Land Processes Data Active Archive Center (LP DAAC) and the LP DAAC GitHub, visitors to the site can be described as: 
+- A **community member**: anyone in the open science community who visits a LP DAAC site, utilizes LP DAAC online tools, or attends a LP DAAC event.
+- A **participant**: anyone who posts a comment or poses a question in the *GitHub Discussion Space*, reports a site bug or requests a new resource in *GitHub Issues*, or attends a LP DAAC event and utilizes any virtual chat features during that event. 
+- A **contributor**: anyone who forks this GitHub repository and submits pull requests to make additions or changes to the posted content.
 
-We pledge to act and interact in ways that contribute to an open, welcoming,
-diverse, inclusive, and healthy community.
+Everyone reading this page is a community member, and we hope everyone will post comments and join discussions as a participant. Contributors are welcome, particularly to help find and point to other open science resources. 
 
-## Our Standards
+## Ways to Contribute to the  GitHub
+There are two main ways to contribute to the LP DAAC GitHub.  
+- **Suggest a change, addition, or deletion to what is already on the GitHub using [Issues](https://github.com/nasa/Transform-to-Open-Science/issues).** Issues can be about any LP DAAC plans, timelines, and content. 
+     - Before submitting a new [issue](https://github.com/nasa/LPDAAC-Data-Resources/issues), check to make sure [a similar issue isn't already open](https://github.com/nasa/LPDAAC-Data-Resources/issues). If one is, contribute to that issue thread with your feedback.
+     - When submitting a bug report, please try to provide as much detail as possible, i.e. a screenshot or [gist](https://gist.github.com/) that demonstrates the problem, the technology you are using, and any relevant links. 
+     - Issues labeled :sparkles:[`help wanted`](https://github.com/nasa/LPDAAC-Data-Resources/labels/help%20wanted):sparkles: make it easy for you to find ways you can contribute today. 
+- **Become a contributor!** [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the repository and [make commits](https://docs.github.com/en/get-started/quickstart/contributing-to-projects#making-and-pushing-changes) to add resources and additional materials. Here are some ways you can contribute:
+     - by reporting bugs
+     - by suggesting new features
+     - by translating content to a new language
+     - by writing or editing documentation
+     - by writing specifications
+     - by writing code and documentation (**no pull request is too small**: fix typos, add code comments, clean up inconsistent whitespace)
+     - by closing [issues](https://github.com/nasa/LPDAAC-Data-Resources/issues)
 
-Examples of behavior that contributes to a positive environment for our
-community include:
+In the spirit of open source software, everyone is encouraged to help improve this project!
+                                                               
+## New to GitHub? Start here!
+You can [sign up for GitHub here](https://github.com/)! The NASA Transform to Open Science Team has made a short video demonstrating how to make an easy pull request [here](https://youtu.be/PHoScPeMWHI).
 
-* Demonstrating empathy and kindness toward other people
-* Being respectful of differing opinions, viewpoints, and experiences
-* Giving and gracefully accepting constructive feedback
-* Accepting responsibility and apologizing to those affected by our mistakes,
-  and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the overall
-  community
+For a more in-depth start, we suggest *[Getting Started with Git and GitHub: The Complete Beginner’s Guide](https://towardsdatascience.com/getting-started-with-git-and-github-6fcd0f2d4ac6)* and *[The Beginners Guide to Git and GitHub](https://www.freecodecamp.org/news/the-beginners-guide-to-git-github/)*. We've summarized some of the most important points below.
 
-Examples of unacceptable behavior include:
+### Making a Change
+*This section is attributed to [NumFOCUS](https://github.com/numfocus/getting-started-with-open-source/blob/master/CONTRIBUTING.md) and [Adrienne Friend](https://github.com/adriennefriend/imposter-syndrome-disclaimer).*
 
-* The use of sexualized language or imagery, and sexual attention or advances of
-  any kind
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email address,
-  without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+Once you've identified something you'd like to help with you're ready to make a change to the project repository!
 
-## Enforcement Responsibilities
+1. First, describe what you're planning to do as a comment to the issue, (and this might mean making a new issue).
 
-Community leaders are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in
-response to any behavior that they deem inappropriate, threatening, offensive,
-or harmful.
+    [This blog](https://www.igvita.com/2011/12/19/dont-push-your-pull-requests/) is a nice explanation of why putting this work in up front is so useful to everyone involved.
 
-Community leaders have the right and responsibility to remove, edit, or reject
-comments, commits, code, wiki edits, issues, and other contributions that are
-not aligned to this Code of Conduct, and will communicate reasons for moderation
-decisions when appropriate.
+2. Fork this repository to your profile.
 
-## Scope
+    You can now do whatever you want with this copy of the project. You won't mess up anyone else's work so you're super safe.
 
-This Code of Conduct applies within all community spaces, and also applies when
-an individual is officially representing the community in public spaces.
-Examples of representing our community include using an official e-mail address,
-posting via an official social media account, or acting as an appointed
-representative at an online or offline event.
+    Make sure to [keep your fork up to date]( https://github.com/KirstieJane/STEMMRoleModels/wiki/Syncing-your-fork-to-the-original-repository-via-the-browser) with the master repository.
 
-## Enforcement
+3. Make the changes you've discussed.
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-LPDAAC@usgs.gov. All complaints will be reviewed and investigated
-promptly and fairly.
+    Try to keep the changes focused rather than changing lots of things at once. If you feel tempted to branch out then please *literally* branch out: create separate branches for different updates to make the next step much easier!
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+4. Submit a pull request.
 
-## Enforcement Guidelines
+    A member of the executive team will review your changes, have a bit of discussion and hopefully merge them in!  
+    
+    N.B. you don't have to be ready to merge to make a pull request! We encourage you to submit a pull request as early as you want to. They help us to keep track of progress and help you to get earlier feedback.
 
-Community leaders will follow these Community Impact Guidelines in determining
-the consequences for any action they deem in violation of this Code of Conduct:
+## Development Model
 
-### 1. Correction
+For accepting new contributions, TOPS uses the [forking workflow](https://guides.github.com/activities/forking/). As the first step of your contribution, you'll want to fork this repository, make a local clone of it, add your contribution, and then create a pull request back to the LP DAAC repository.  
 
-**Community Impact**: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.
-
-**Consequence**: A private, written warning from community leaders, providing
-clarity around the nature of the violation and an explanation of why the
-behavior was inappropriate. A public apology may be requested.
-
-### 2. Warning
-
-**Community Impact**: A violation through a single incident or series of
-actions.
-
-**Consequence**: A warning with consequences for continued behavior. No
-interaction with the people involved, including unsolicited interaction with
-those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
-like social media. Violating these terms may lead to a temporary or permanent
-ban.
-
-### 3. Temporary Ban
-
-**Community Impact**: A serious violation of community standards, including
-sustained inappropriate behavior.
-
-**Consequence**: A temporary ban from any sort of interaction or public
-communication with the community for a specified period of time. No public or
-private interaction with the people involved, including unsolicited interaction
-with those enforcing the Code of Conduct, is allowed during this period.
-Violating these terms may lead to a permanent ban.
-
-### 4. Permanent Ban
-
-**Community Impact**: Demonstrating a pattern of violation of community
-standards, including sustained inappropriate behavior, harassment of an
-individual, or aggression toward or disparagement of classes of individuals.
-
-**Consequence**: A permanent ban from any sort of public interaction within the
-community.
+All documentation should be written using Markdown and Github Markdown-supported HTML.  
 
 ## Attribution
-
-This Code of Conduct is adapted from the [Zarr Developers][Github], available at
-[https://github.com/zarr-developers/.github/blob/main/CODE_OF_CONDUCT.md] and
-from the [Contributor Covenant][homepage], version 2.1, available at
-[https://www.contributor-covenant.org/version/2/1/code_of_conduct.html][v2.1].
-
-Community Impact Guidelines were inspired by
-[Mozilla's code of conduct enforcement ladder][Mozilla CoC].
-
-For answers to common questions about this code of conduct, see the FAQ at
-[https://www.contributor-covenant.org/faq][FAQ]. Translations are available at
-[https://www.contributor-covenant.org/translations][translations].
-
-[homepage]: https://www.contributor-covenant.org
-[v2.1]: https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
-[Mozilla CoC]: https://github.com/mozilla/diversity
-[FAQ]: https://www.contributor-covenant.org/faq
-[translations]: https://www.contributor-covenant.org/translations
+These contributing guidelines are adapted from the NASA Transform to Open Science github, available at https://github.com/nasa/Transform-to-Open-Science/blob/main/CONTRIBUTING.md.
