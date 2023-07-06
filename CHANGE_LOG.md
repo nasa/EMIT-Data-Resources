@@ -20,7 +20,8 @@ _________________________________________________________________________
 > - Updated notebooks to support changes made to `emit_tools.py`
 > - Improved RGB Image creation and brightness adjustment in `Exploring_EMIT_L2A_Reflectance` Tutorial
 > - Each notebook now uses the `earthaccess` python library to handle NASA Earthdata Login and downloads of needed files
-> - Updated `setup_instructions.md` and recommended python environment `emit_tutorials.yml`
+> - Updated `setup_instructions.md` and recommended python environment `emit_tutorials_windows.yml`
+> - Updated `setup_instructions.md` to recommend mamba
 
 ## 2023-05-30
 
