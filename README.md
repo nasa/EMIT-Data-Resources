@@ -24,12 +24,13 @@ Below are the resource available for EMIT Data.
 |:---|:---|:---|
 |[Getting EMIT Data using EarthData Search](guides/Getting_EMIT_Data_using_EarthData_Search.md)|Markdown Guide|A thourough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data|
 |[Exploring EMIT L2A Reflectance](python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb)|Jupyter Notebook|Explore EMIT L2A Reflectance data using interactive plots|
+|[How to find and access EMIT data](python/how-tos/How_to_find_and_access_EMIT_data.ipynb)|Jupyter Notebook|Use the `earthaccess` Python library to find and download or stream EMIT data|
 |[How to Convert to ENVI Format](python/how-tos/How_to_Convert_to_ENVI.ipynb)|Jupyter Notebook|Convert from downloaded netCDF4 (.nc) format to .envi format|
 |[How to Orthorectify](python/how-tos/How_to_Orthorectify.ipynb)|Jupyter Notebook|Use the geometry lookup table (GLT) included with the EMIT netCDF4 file to project on a geospatial grid (EPSG:4326)|
 |[How to Extract Point Data](python/how-tos/How_to_Extract_Points.ipynb)|Jupyter Notebook|Extract spectra using lat/lon coordinates from a .csv and build a dataframe/.csv output|
-|[How to Extract Area Data](python/how-tos/How_to_Extract_Area.ipynb)|Jupyter Notebook|Clip to/extract an area defined by a .geojson or shapefile|
+|[How to Extract Area Data](python/how-tos/How_to_Extract_Area.ipynb)|Jupyter Notebook|Extract an area defined by a .geojson or shapefile|
 |[How to use EMIT Quality Data](python/how-tos/How_to_use_EMIT_Quality_data.ipynb)|Jupyter Notebook|Build a mask using an EMIT L2A Mask file and apply it to an L2A Reflectance file|
-|[How to use Direct S3 Access with EMIT](python/how-tos/How_to_Direct_S3_Access.ipynb)|Jupyter Notebook|Use S3 from inside us-west2 to access EMIT Data|
+|[How to use Direct S3 Access with EMIT](python/how-tos/How_to_Direct_S3_Access.ipynb)|Jupyter Notebook|Use S3 from inside AWS us-west2 to access EMIT Data|
 |[How to find EMIT Data using NASA's CMR API](python/how-tos/How_to_find_EMIT_data_using_CMR_API.ipynb)|Jupyter Notebook|Use NASA's CMR API to programatically find EMIT Data|
 
 ---
@@ -41,7 +42,7 @@ Below are the resource available for EMIT Data.
 + [LP DAAC EMIT Product Pages](https://lpdaac.usgs.gov/product_search/?query=emit&status=Operational&view=cards&sort=title) - Learn more about available EMIT products  
 + [VISIONS Open Data Portal](https://earth.jpl.nasa.gov/emit/data/data-portal/coverage-and-forecasts/) - Learn about current and forecatsed EMIT coverage  
 
-+ [EMIT on Earth Data Search](https://search.earthdata.nasa.gov/search?q=%22EMIT%22) - Download EMIT Data from NASA 
++ [EMIT on Earth Data Search](https://search.earthdata.nasa.gov/search?q=%22EMIT%22) - Download EMIT Data from NASA
 
 + [EMIT Github Repository](https://github.com/emit-sds) - Main EMIT Repository  
 
@@ -55,12 +56,12 @@ Below are the resource available for EMIT Data.
 
 ---
 
-## Contact Info:  
+## Contact Info  
 
-Email: LPDAAC@usgs.gov  
+Email: <LPDAAC@usgs.gov>  
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 05-18-2023  
+Date last modified: 07-07-2023  
 
 ¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
