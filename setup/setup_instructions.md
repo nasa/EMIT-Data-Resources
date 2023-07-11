@@ -1,10 +1,12 @@
 # Repository Setup Instructions
 
-The how-tos and tutorials in this repository require a [NASA Earthdata account](https://urs.earthdata.nasa.gov/), an installation of [Git](https://git-scm.com/downloads), and a compatible Python Environment. We recommend [mamba](https://mamba.readthedocs.io/en/latest/) to manage Python environments. To install mamba, download [mambaforge](https://github.com/conda-forge/miniforge#mambaforge) for your operating system.  If using Windows, be sure to check the box to "Add mamba to my PATH environment variable" to enable use of mamba directly from your command line interface. **Note that this may cause an issue if you have an existing mamba install through Anaconda.**  
+The how-tos and tutorials in this repository require a [NASA Earthdata account](https://urs.earthdata.nasa.gov/), an installation of [Git](https://git-scm.com/downloads), and a compatible Python Environment. We recommend [mamba](https://mamba.readthedocs.io/en/latest/) to manage Python packages, but if you are already using another package manager like *conda*, that will work as well. To install *mamba*, download [mambaforge](https://github.com/conda-forge/miniforge#mambaforge) for your operating system.  If using Windows, be sure to check the box to "Add mamba to my PATH environment variable" to enable use of mamba directly from your command line interface. **Note that this may cause an issue if you have an existing mamba install through Anaconda.**  
 
 ## Python Environment Setup
 
 These Python Environments will work for all of the guides, how-to's, and tutorials within this repository. A `.yml` file that can be used to set up the necessary environment has been included in the repository for both Windows and MacOS. Use the appropriate file in the steps below.
+
+> If you wish to use *conda* as your package manager you can simply substitute 'conda' for 'mamba' in the steps below.
 
 1. Using your preferred command line interface (command prompt, terminal, cmder, etc.) navigate to your local copy of the repository, then type the following to create a compatible Python environment.
 
