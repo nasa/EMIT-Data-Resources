@@ -208,7 +208,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
         out_ds = apply_glt(raw_ds,glt_ds, GLT_NODATA_VALUE=GLT_NODATA_VALUE)
         
         # Mask fill values
-        #out_ds[out_ds==fill_value] = np.nan
+        out_ds[out_ds==fill_value] = np.nan
 
         # Update variables - Only works for 2 or 3 dimensional arays
         if raw_ds.ndim == 2:
@@ -252,9 +252,6 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     
     # Add Spatial Reference in recognizable format
     out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
-
-    # Mask Fill Values
-    out_xr[var].data[out_xr[var].data == fill_value] = np.nan
     
     return out_xr  
 
@@ -356,12 +353,16 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
     for var in var_names:
         # Define output filename
         output_name = os.path.join(output_dir, xr_ds.attrs['granule_id'] + '_' + var)
-    
+
+        nbands = 1
+        if len(xr_ds[var].data.shape) > 2:
+            nbands = xr_ds[var].data.shape[2]
+
         # Start building metadata
         metadata = {
                 'lines': xr_ds[var].data.shape[0],
                 'samples': xr_ds[var].data.shape[1],
-                'bands': xr_ds[var].data.shape[2],
+                'bands': nbands,
                 'interleave': interleave,
                 'header offset' : 0,
                 'file type' : 'ENVI Standard',
@@ -402,12 +403,18 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
             metadata['map info'] = mapinfo
         
         # Replace NaN values in each layer with fill_value
-        np.nan_to_num(xr_ds[var].data, copy=False, nan=-9999)
+        #np.nan_to_num(xr_ds[var].data, copy=False, nan=-9999)
         
         # Write Variables as ENVI Output
         envi_ds = envi.create_image(envi_header(output_name), metadata, ext=extension, force=overwrite)
         mm = envi_ds.open_memmap(interleave='bip', writable=True)   
-        mm[...]= xr_ds[var].data
+        
+        dat = xr_ds[var].data
+
+        if len(dat.shape) == 2:
+            dat = dat.reshape((dat.shape[0],dat.shape[1],1))
+
+        mm[...]= dat
 
     # Create GLT Metadata/File
     if glt_file == True:
@@ -418,8 +425,8 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
         glt_metadata = metadata
         
         # Remove Unwanted Metadata
-        del glt_metadata['wavelength']
-        del glt_metadata['fwhm']
+        glt_metadata.pop('wavelength',None)
+        glt_metadata.pop('fwhm', None)
         
         # Replace Metadata 
         glt_metadata['lines'] = xr_ds['glt_x'].data.shape[0]
