@@ -27,7 +27,7 @@ import rasterio as rio
 import s3fs
 from fsspec.implementations.http import HTTPFile
 
-def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None, flat_field=False): 
+def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None): 
     """
         This function utilizes other functions in this module to streamline opening an EMIT dataset as an xarray.Dataset.
         
@@ -36,7 +36,6 @@ def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None, flat_fie
         ortho: True or False, whether to orthorectify the dataset or leave in crosstrack/downtrack coordinates.
         qmask: a numpy array output from the quality_mask function used to mask pixels based on quality flags selected in that function. Any non-orthorectified array with the proper crosstrack and downtrack dimensions can also be used.
         unpacked_bmask: a numpy array from  the band_mask function that can be used to mask band-specific pixels that have been interpolated.
-        flat_field: for radiance product, apply the flat-field correction if applicable.
                         
         Returns:
         out_xr: an xarray.Dataset constructed based on the parameters provided.
@@ -108,10 +107,6 @@ def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None, flat_fie
         if unpacked_bmask is not None:
             out_xr[var].data[unpacked_bmask == 1] = np.nan               
         out_xr[var].data[out_xr[var].data == -9999] = np.nan
-    
-    if 'radiance' in list(out_xr.data_vars) and flat_field is True :
-        out_xr['radiance'].data = out_xr['radiance'].data*out_xr['flat_field_update'].data
-        out_xr = out_xr.drop_vars('flat_field_update')
 
     if ortho is True:
        out_xr = ortho_xr(out_xr)
@@ -193,7 +188,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     # List Variables
     var_list = list(ds.data_vars)
     
-    # Remove flat field from data vars (Radiance only, should be applied before orthorectifiaction)
+    # Remove flat field from data vars - the flat field is only useful with additional information before orthorectification
     if 'flat_field_update' in var_list:
         var_list.remove('flat_field_update')
     
