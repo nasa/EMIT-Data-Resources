@@ -4,14 +4,16 @@ like opening and flattening the data to work in xarray, orthorectification, and 
 
 Author: Erik Bolch, ebolch@contractor.usgs.gov 
 
-Last Updated: 04/11/2023
+Last Updated: 06/29/2023
 
 TO DO: 
 - Add units to metadata for ENVI header
-- Fix elevation orthorectification - use 2d glt? all values end up as -9999
 - Investigate reducing memory usage
-- Test/Improve flexibility for applying the GLT to modified datasets
+- Improve conditionals to evaluate which EMIT product is being used/what to use for band dimension indexing
+- Test/Improve flexibility for applying the GLT to modified/clipped datasets
+- Improve envi conversion function
 """
+
 # Packages used
 import netCDF4 as nc
 import os
@@ -25,7 +27,7 @@ import rasterio as rio
 import s3fs
 from fsspec.implementations.http import HTTPFile
 
-def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None): 
+def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None): 
     """
         This function utilizes other functions in this module to streamline opening an EMIT dataset as an xarray.Dataset.
         
@@ -39,34 +41,78 @@ def emit_xarray(filepath, ortho=True, qmask=None, unpacked_bmask=None):
         out_xr: an xarray.Dataset constructed based on the parameters provided.
 
         """
-    # Read in Data as Xarray Datasets
-    ds = xr.open_dataset(filepath,engine = 'h5netcdf')
-    loc = xr.open_dataset(filepath, engine = 'h5netcdf', group='location')
-    wvl = xr.open_dataset(filepath, engine = 'h5netcdf', group='sensor_band_parameters') 
+    # Grab granule filename to check product
+    
+    if type(filepath) == s3fs.core.S3File:
+        granule_id = filepath.info()['name'].split('/',-1)[-1].split('.',-1)[0]
+    elif type(filepath) == HTTPFile:
+        granule_id = filepath.path.split('/',-1)[-1].split('.',-1)[0]
+    else:
+        granule_id = os.path.splitext(os.path.basename(filepath))[0]    
+                 
+    # Read in Data as Xarray Datasets  
+    engine, wvl_group = 'h5netcdf', None
+    
+    ds = xr.open_dataset(filepath,engine = engine)
+    loc = xr.open_dataset(filepath, engine = engine, group='location')  
+                 
+    # Check if mineral dataset and read in groups (only ds/loc for minunc)
+    
+    if 'L2B_MIN_' in granule_id:
+        wvl_group = 'mineral_metadata'
+    elif 'L2B_MINUNC' not in granule_id:
+        wvl_group = 'sensor_band_parameters'
+    
+    wvl = None
+    
+    if wvl_group:
+        wvl = xr.open_dataset(filepath, engine = engine, group=wvl_group) 
     
     # Building Flat Dataset from Components
     data_vars = {**ds.variables} 
-    coords = {'downtrack':(['downtrack'], ds.downtrack.data),'crosstrack':(['crosstrack'],ds.crosstrack.data), **loc.variables, **wvl.variables}
+    
+    # Format xarray coordinates based upon emit product (no wvl for mineral uncertainty)
+    coords = {
+        'downtrack':(['downtrack'], ds.downtrack.data),
+        'crosstrack':(['crosstrack'],ds.crosstrack.data),
+        **loc.variables
+    }
+    
+    product_band_map = {
+        'L2B_MIN_': 'name', 'L2A_MASK_': 'mask_bands',
+        'L1B_OBS_': 'observation_bands', 'L2A_RFL_':'wavelengths', 
+        'L1B_RAD_':'wavelengths','L2A_RFLUNCERT_':'wavelengths'
+    }
+
+   # if band := product_band_map.get(next((k for k in product_band_map.keys() if k in granule_id), 'unknown'), None):
+        #coords['bands'] = wvl[band].data
+    
+    if wvl:
+        coords = {**coords, **wvl.variables}
+        
     out_xr = xr.Dataset(data_vars=data_vars, coords = coords, attrs= ds.attrs)
-    if type(filepath) == s3fs.core.S3File:
-        out_xr.attrs['granule_id'] = filepath.info()['name'].split('/',-1)[-1].split('.',-1)[0]
-    elif type(filepath) == HTTPFile:
-        out_xr.attrs['granule_id'] = filepath.path.split('/',-1)[-1].split('.',-1)[0]
-    else:
-        out_xr.attrs['granule_id'] = os.path.splitext(os.path.basename(filepath))[0]
+    out_xr.attrs['granule_id'] = granule_id
     
-    # Apply Quality and Band Masks
-    if qmask is not None:
-        out_xr[list(out_xr.data_vars)[0]].values[qmask == 1] = np.nan
-    if unpacked_bmask is not None:
-        out_xr[list(out_xr.data_vars)[0]].values[unpacked_bmask == 1] = np.nan               
+    if band := product_band_map.get(next((k for k in product_band_map.keys() if k in granule_id), 'unknown'), None):
+        if 'minerals' in list(out_xr.dims):
+            out_xr = out_xr.swap_dims({'minerals':band})
+            out_xr = out_xr.rename({band: 'mineral_name'})
+        else:
+            out_xr = out_xr.swap_dims({'bands':band})
     
+    # Apply Quality and Band Masks, set fill values to NaN
+    for var in list(ds.data_vars):
+        if qmask is not None:
+            out_xr[var].data[qmask == 1] = np.nan
+        if unpacked_bmask is not None:
+            out_xr[var].data[unpacked_bmask == 1] = np.nan               
+        out_xr[var].data[out_xr[var].data == -9999] = np.nan
+
     if ortho is True:
        out_xr = ortho_xr(out_xr)
        out_xr.attrs['Orthorectified'] = 'True'
               
     return out_xr
-
 
 # Function to Calculate the Lat and Lon Vectors/Coordinate Grid
 def coord_vects(ds):
@@ -100,7 +146,7 @@ def coord_vects(ds):
 # Function to Apply the GLT to an array
 def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     """
-    This function applies a numpy array of the EMIT glt to a numpy array of the desired dataset (i.e. reflectance, radiance, etc. 
+    This function applies the GLT array to a numpy array of either 2 or 3 dimensions.
     
     Parameters:
     ds_array: numpy array of the desired variable
@@ -111,6 +157,8 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     """
 
     # Build Output Dataset
+    if ds_array.ndim == 2:
+        ds_array = ds_array[:,:,np.newaxis]
     out_ds = np.full((glt_array.shape[0], glt_array.shape[1], ds_array.shape[-1]), fill_value, dtype=np.float32)
     valid_glt = np.all(glt_array != GLT_NODATA_VALUE, axis=-1)
     
@@ -119,30 +167,9 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     out_ds[valid_glt, :] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0], :]
     return out_ds
 
-def apply_glt_2d(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
-    """
-    This function applies a numpy array of the EMIT glt to a numpy array of the desired 2d dataset (i.e. lat, lon, elev, etc. 
-    
-    Parameters:
-    ds_array: numpy array of the desired variable
-    glt_array: a GLT array constructed from EMIT GLT data
-    
-    Returns: 
-    out_ds: a numpy array of orthorectified data.
-    """
-
-    # Build Output Dataset
-    out_ds = np.full((glt_array.shape[0], glt_array.shape[1]), fill_value, dtype=np.float32)
-    valid_glt = np.all(glt_array != GLT_NODATA_VALUE, axis=-1)
-    
-    # Adjust for One based Index
-    glt_array[valid_glt] -= 1 
-    out_ds[valid_glt] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0]]
-    return out_ds
-
 def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     """
-    This function applies the GLT to variables within an EMIT dataset that has been read into the format provided in by the emit_xarray function.
+    This function uses `apply_glt` to create an orthorectified xarray dataset.
 
     Parameters:
     ds: an xarray dataset produced by emit_xarray
@@ -161,6 +188,10 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     # List Variables
     var_list = list(ds.data_vars)
     
+    # Remove flat field from data vars - the flat field is only useful with additional information before orthorectification
+    if 'flat_field_update' in var_list:
+        var_list.remove('flat_field_update')
+    
     # Create empty dictionary for orthocorrected data vars
     data_vars = {}   
 
@@ -170,16 +201,25 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
         var_dims = ds[var].dims
         # Apply GLT to dataset
         out_ds = apply_glt(raw_ds,glt_ds, GLT_NODATA_VALUE=GLT_NODATA_VALUE)
+        
+        # Mask fill values
+        out_ds[out_ds==fill_value] = np.nan
 
+        # Update variables - Only works for 2 or 3 dimensional arays
+        if raw_ds.ndim == 2:
+            out_ds = out_ds.squeeze()
+            data_vars[var] = (['latitude','longitude'], out_ds)
+        else:
+            data_vars[var] = (['latitude','longitude', var_dims[-1]], out_ds)
+            
         del raw_ds
-        #Update variables
-        data_vars[var] = (['latitude','longitude', var_dims[-1]], out_ds)
-    
+        
     # Calculate Lat and Lon Vectors
     lon, lat = coord_vects(ds) # Reorder this function to make sense in case of multiple variables
 
     # Apply GLT to elevation
-    #elev_ds = apply_glt(ds['elev'].data[:,:,np.newaxis],glt_ds)
+    elev_ds = apply_glt(ds['elev'].data,glt_ds)
+    elev_ds[elev_ds==fill_value] = np.nan
     
     # Delete glt_ds - no longer needed
     del glt_ds
@@ -192,22 +232,21 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
         del coords[key]
     
     # Add Orthocorrected Elevation
-    #coords['elev'] = (['latitude','longitude'], np.squeeze(elev_ds))
+    coords['elev'] = (['latitude','longitude'], np.squeeze(elev_ds))
 
     # Build Output xarray Dataset and assign data_vars array attributes
     out_xr = xr.Dataset(data_vars=data_vars, coords=coords, attrs=ds.attrs)
     
     del out_ds
     # Assign Attributes from Original Datasets
-    out_xr[var].attrs = ds[var].attrs
+    for var in var_list:
+        out_xr[var].attrs = ds[var].attrs
     out_xr.coords['latitude'].attrs = ds['lat'].attrs
     out_xr.coords['longitude'].attrs = ds['lon'].attrs
+    out_xr.coords['elev'].attrs = ds['elev'].attrs
     
     # Add Spatial Reference in recognizable format
     out_xr.rio.write_crs(ds.spatial_ref,inplace=True)
-
-    # Mask Fill Values
-    out_xr[var].data[out_xr[var].data == fill_value] = np.nan
     
     return out_xr  
 
@@ -260,9 +299,9 @@ def band_mask(filepath):
     # Check for data bands and build mask
     return(unpacked_bmask)
 
-def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave='bil', glt_file=False):
+def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave='BIL', glt_file=False):
     """
-    This function takes an EMIT dataset read into an xarray dataset using the emit_xarray function and then writes an ENVI file and header. 
+    This function takes an EMIT dataset read into an xarray dataset using the emit_xarray function and then writes an ENVI file and header. Does not work for L2B MIN.
 
     Parameters:
     xr_ds: an EMIT dataset read into xarray using the emit_xarray function.
@@ -297,12 +336,11 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
     
     # Get CRS/geotransform for creation of Orthorectified ENVI file or optional GLT file
     gt = xr_ds.attrs['geotransform']
-    mapinfo = '{Geographic Lat/Lon, 1, 1, ' + str(gt[0]) + ', ' + str(gt[3]) + ', ' + str(gt[1]) + ', ' + str(gt[5]) +', WGS 84, units=Degrees}'
+    mapinfo = '{Geographic Lat/Lon, 1, 1, ' + str(gt[0]) + ', ' + str(gt[3]) + ', ' + str(gt[1]) + ', ' + str(gt[5]*-1) +', WGS-84, units=Degrees}'
     
-    # This creates the coordinate system string - ENVI hdr does not seem to support the optional authority and axis fields
+    # This creates the coordinate system string
     # hard-coded replacement of wkt crs could probably be improved, though should be the same for all EMIT datasets
-    csstring = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433]]'
-
+    csstring = '{ GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AXIS["Latitude",NORTH],AXIS["Longitude",EAST],AUTHORITY["EPSG","4326"]] }'
     # List data variables (typically reflectance/radiance)
     var_names = list(xr_ds.data_vars)
 
@@ -310,12 +348,16 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
     for var in var_names:
         # Define output filename
         output_name = os.path.join(output_dir, xr_ds.attrs['granule_id'] + '_' + var)
-    
+
+        nbands = 1
+        if len(xr_ds[var].data.shape) > 2:
+            nbands = xr_ds[var].data.shape[2]
+
         # Start building metadata
         metadata = {
                 'lines': xr_ds[var].data.shape[0],
                 'samples': xr_ds[var].data.shape[1],
-                'bands': xr_ds[var].data.shape[2],
+                'bands': nbands,
                 'interleave': interleave,
                 'header offset' : 0,
                 'file type' : 'ENVI Standard',
@@ -332,12 +374,21 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
         # List all variables in dataset (including coordinate variables)
         meta_vars = list(xr_ds.variables) 
 
-        # Add wavelength information to metadata
+        # Add band parameter information to metadata (ie wavelengths/obs etc.)
         for m in meta_vars:
             if m == 'wavelengths' or m == 'radiance_wl':
                 metadata['wavelength'] = np.array(xr_ds[m].data).astype(str).tolist()
             elif m == 'fwhm' or m == 'radiance_fwhm':
                 metadata['fwhm'] = np.array(xr_ds[m].data).astype(str).tolist()
+            elif m == 'good_wavelengths':
+                metadata['good_wavelengths'] = np.array(xr_ds[m].data).astype(int).tolist()
+            elif m ==  'observation_bands':
+                metadata['band names'] = np.array(xr_ds[m].data).astype(str).tolist()
+            elif m == 'mask_bands':
+                if var == 'band_mask':
+                    metadata['band names'] = ['packed_bands_' + bn for bn in np.arange(285/8).astype(str).tolist()]
+                else:
+                    metadata['band names'] = np.array(xr_ds[m].data).astype(str).tolist()                
             if 'wavelength' in list(metadata.keys()) and 'band names' not in list (metadata.keys()):
                 metadata['band names'] = metadata['wavelength']
     
@@ -345,10 +396,20 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
         if 'Orthorectified' in xr_ds.attrs.keys() and xr_ds.attrs['Orthorectified'] == 'True':
             metadata['coordinate system string']= csstring
             metadata['map info'] = mapinfo
+        
+        # Replace NaN values in each layer with fill_value
+        #np.nan_to_num(xr_ds[var].data, copy=False, nan=-9999)
+        
         # Write Variables as ENVI Output
         envi_ds = envi.create_image(envi_header(output_name), metadata, ext=extension, force=overwrite)
         mm = envi_ds.open_memmap(interleave='bip', writable=True)   
-        mm[...]= xr_ds[var].data
+        
+        dat = xr_ds[var].data
+
+        if len(dat.shape) == 2:
+            dat = dat.reshape((dat.shape[0],dat.shape[1],1))
+
+        mm[...]= dat
 
     # Create GLT Metadata/File
     if glt_file == True:
@@ -359,8 +420,8 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
         glt_metadata = metadata
         
         # Remove Unwanted Metadata
-        del glt_metadata['wavelength']
-        del glt_metadata['fwhm']
+        glt_metadata.pop('wavelength',None)
+        glt_metadata.pop('fwhm', None)
         
         # Replace Metadata 
         glt_metadata['lines'] = xr_ds['glt_x'].data.shape[0]
@@ -376,8 +437,6 @@ def write_envi(xr_ds, output_dir, overwrite=False, extension='.img', interleave=
         mmglt = glt_ds.open_memmap(interleave='bip', writable=True)
         mmglt[...] = np.stack((xr_ds['glt_x'].values,xr_ds['glt_y'].values),axis=-1).astype('int32')
     
-
-
 def envi_header(inputpath):
     """
     Convert a envi binary/header path to a header, handling extensions

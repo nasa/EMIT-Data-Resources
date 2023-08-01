@@ -1,54 +1,66 @@
 # Repository Setup Instructions
 
-The how-tos and tutorials in this repository require a compatible Python Environment, an installation of [Git](https://git-scm.com/downloads), and some EMIT granules that are too large to be included in the repository. To setup the environment and download these files, follow the steps in sections 1 and 2. If you plan to programmatically download or utilize s3 access, you will also need to configure a `.netrc` file with your NASA Earthdata Login info, which is also done in section 1 below.
+The how-tos and tutorials in this repository require a [NASA Earthdata account](https://urs.earthdata.nasa.gov/), an installation of [Git](https://git-scm.com/downloads), and a compatible Python Environment. We recommend [mamba](https://mamba.readthedocs.io/en/latest/) to manage Python packages, but if you are already using another package manager like *conda*, that will work as well. To install *mamba*, download [mambaforge](https://github.com/conda-forge/miniforge#mambaforge) for your operating system.  If using Windows, be sure to check the box to "Add mamba to my PATH environment variable" to enable use of mamba directly from your command line interface. **Note that this may cause an issue if you have an existing mamba install through Anaconda.**  
 
-+ If you do not have an Environment Manager installed, we recommend  [Anaconda](https://www.anaconda.com/products/distribution) or [miniconda](https://docs.conda.io/en/latest/miniconda.html). When installing, be sure to check the box to "Add Anaconda to my PATH environment variable" to enable use of conda directly from your command line interface.
-+ If you do not have Git, you can download it [here](https://git-scm.com/downloads).  
+## Python Environment Setup
 
-## 1. Python Environment Setup  and .netrc file configuration
+These Python Environments will work for all of the guides, how-to's, and tutorials within this repository. A `.yml` file that can be used to set up the necessary environment has been included in the repository for both Windows and MacOS. Use the appropriate file in the steps below.
 
-This Python Environment will work for all of the guides, how-to's, and tutorials within this repository. Using your preferred command line interface (command prompt, terminal, cmder, etc.) navigate to your local copy of the repository, then type the following to create a compatible Python environment using the included `.yml` file.  
+> If you wish to use *conda* as your package manager you can simply substitute 'conda' for 'mamba' in the steps below.
 
-> `conda env create -f setup/emit_tutorials.yml`  
+1. Using your preferred command line interface (command prompt, terminal, cmder, etc.) navigate to your local copy of the repository, then type the following to create a compatible Python environment.
 
-Next, activate the Python Environment that you just created.
+    For Windows:
 
-> `conda activate emit_tutorials`  
+    ```cmd
+    mamba env create -f setup/emit_tutorials_windows.yml
+    ```
 
-To configure your `.netrc` file, execute the `EarthDataLoginSetup.py` script contained in the `/setup/` folder. It will prompt you for you NASA Earth Data account name and password.
+    For MacOS:
 
-> `python setup/EarthDataLoginSetup.py`  
+    ```cmd
+    mamba env create -f setup/emit_tutorials_macos.yml
+    ```
 
-Now you can launch Jupyter Notebook to open the notebooks included.
+2. Next, activate the Python Environment that you just created.
 
-> `jupyter notebook`  
+    ```cmd
+    mamba activate emit_tutorials 
+    ```
 
-[Additional information](https://conda.io/docs/user-guide/tasks/manage-environments.html) on setting up and managing Conda environments.  
+3. Now you can launch Jupyter Notebook to open the notebooks included.
+
+    ```cmd
+    jupyter notebook 
+    ```
+
+If you're having trouble creating a compatible Python Environment, you can also try to create one using the commands below. Using your preferred command line interface (command prompt, terminal, cmder, etc.) type the following to create a compatible Python environment.
+
+For Windows:
+
+```cmd
+mamba create -n emit_tutorials -c conda-forge --yes python=3.11 fiona=1.8.22 gdal hvplot geoviews rioxarray rasterio jupyter geopandas earthaccess jupyter_bokeh h5py 
+h5netcdf spectral
+```
+
+For MacOSX:
+
+```cmd
+mamba create -n emit_tutorials -c conda-forge --yes python=3.9 gdal=3.6.4 hvplot geoviews rioxarray rasterio geopandas fiona=1.8.22 jupyter earthaccess jupyter_bokeh h5py h5netcdf spectral
+```
+
+After this, you should be able to do steps 2 and 3 above.
+
 **Still having trouble getting a compatible Python environment set up? Contact [LP DAAC User Services](https://lpdaac.usgs.gov/lpdaac-contact-us/).**  
-
-## 2. File Downloads  
-
-These granules below are used within this tutorial. Click/copy the URLs into a browser to download. Save them into the `./data/` folder within this repository. You will need a [NASA Earth Data Search](https://search.earthdata.nasa.gov/search) login.  
-
-+ L2A Reflectance Granule - <https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220903T163129_2224611_012/EMIT_L2A_RFL_001_20220903T163129_2224611_012.nc>  
-+ L2A Mask Granule - <https://data.lpdaac.earthdatacloud.nasa.gov/lp-prod-protected/EMITL2ARFL.001/EMIT_L2A_RFL_001_20220903T163129_2224611_012/EMIT_L2A_MASK_001_20220903T163129_2224611_012.nc>  
-
-To download a list of urls contained within a textfile, you can also choose to use the DAAC Data Downloader Tool, a tool designed to automate the download process by reading a list of URLs from a text file. Open your preferred command line interface and navigate to the your local copy of this repository. To download the repository, type the following in the command line. This requires a NASA Earth Data account and will prompt you to configure a `.netrc` file if you do not have one configured.
-
->`git clone https://git.earthdata.nasa.gov/scm/lpdur/daac_data_download_python.git ./daac_data_download_python/`
-
-After copying the repository you can execute the python script, providing the `-dir` argument as a directory to save to, and the `-f` argument, a URL or text file containing a list of URLs to download.  
-
->`python ./daac_data_download_python/DAACDataDownload.py -dir ./data/ -f ./data/emit_data_urls.txt`
 
 ---
 
-## Contact Info:  
+## Contact Info  
 
-Email: LPDAAC@usgs.gov  
+Email: <LPDAAC@usgs.gov>  
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 01-09-2023  
+Date last modified: 07-06-2023  
 
 ¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
