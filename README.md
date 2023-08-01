@@ -22,7 +22,7 @@ Below are the resource available for EMIT Data.
 
 |Name|Type|Summary|
 |:---|:---|:---|
-|[Getting EMIT Data using EarthData Search](guides/Getting_EMIT_Data_using_EarthData_Search.md)|Markdown Guide|A thourough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data|
+|[Getting EMIT Data using EarthData Search](guides/Getting_EMIT_Data_using_EarthData_Search.md)|Markdown Guide|A thorough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data|
 |[Exploring EMIT L2A Reflectance](python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb)|Jupyter Notebook|Explore EMIT L2A Reflectance data using interactive plots|
 |[How to find and access EMIT data](python/how-tos/How_to_find_and_access_EMIT_data.ipynb)|Jupyter Notebook|Use the `earthaccess` Python library to find and download or stream EMIT data|
 |[How to Convert to ENVI Format](python/how-tos/How_to_Convert_to_ENVI.ipynb)|Jupyter Notebook|Convert from downloaded netCDF4 (.nc) format to .envi format|
