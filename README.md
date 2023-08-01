@@ -40,7 +40,7 @@ Below are the resource available for EMIT Data.
 + [JPL EMIT Website](https://earth.jpl.nasa.gov/emit/)  
 + [Video of 2023 Tutorial Series](https://www.youtube.com/playlist?list=PLO2yB4LGNlWrC5NdxeHMxyAxdwQhSypXe)
 + [LP DAAC EMIT Product Pages](https://lpdaac.usgs.gov/product_search/?query=emit&status=Operational&view=cards&sort=title) - Learn more about available EMIT products  
-+ [VISIONS Open Data Portal](https://earth.jpl.nasa.gov/emit/data/data-portal/coverage-and-forecasts/) - Learn about current and forecatsed EMIT coverage  
++ [VISIONS Open Data Portal](https://earth.jpl.nasa.gov/emit/data/data-portal/coverage-and-forecasts/) - Learn about current and forecasted EMIT coverage  
 
 + [EMIT on Earth Data Search](https://search.earthdata.nasa.gov/search?q=%22EMIT%22) - Download EMIT Data from NASA
 
