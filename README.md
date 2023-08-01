@@ -31,7 +31,7 @@ Below are the resource available for EMIT Data.
 |[How to Extract Area Data](python/how-tos/How_to_Extract_Area.ipynb)|Jupyter Notebook|Extract an area defined by a .geojson or shapefile|
 |[How to use EMIT Quality Data](python/how-tos/How_to_use_EMIT_Quality_data.ipynb)|Jupyter Notebook|Build a mask using an EMIT L2A Mask file and apply it to an L2A Reflectance file|
 |[How to use Direct S3 Access with EMIT](python/how-tos/How_to_Direct_S3_Access.ipynb)|Jupyter Notebook|Use S3 from inside AWS us-west2 to access EMIT Data|
-|[How to find EMIT Data using NASA's CMR API](python/how-tos/How_to_find_EMIT_data_using_CMR_API.ipynb)|Jupyter Notebook|Use NASA's CMR API to programatically find EMIT Data|
+|[How to find EMIT Data using NASA's CMR API](python/how-tos/How_to_find_EMIT_data_using_CMR_API.ipynb)|Jupyter Notebook|Use NASA's CMR API to programmatically find EMIT Data|
 
 ---
 
