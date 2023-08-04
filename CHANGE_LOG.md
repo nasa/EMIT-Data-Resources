@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
 
+## 2023-08-04
+
+> ### Changed
+>
+> - Updated `How to Direct S3 Access` notebook to include `earthaccess`
+
 ## 2023-07-06
 
 > ### Added
