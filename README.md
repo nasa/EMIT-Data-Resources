@@ -18,7 +18,7 @@ This repository requires that users set up a compatible Python environment and d
 
 ## Repository Contents  
 
-Below are the resource available for EMIT Data.  
+Below are the resources available for EMIT Data.  
 
 |Name|Type|Summary|
 |:---|:---|:---|
