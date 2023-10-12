@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
 
+## 2023-10-12
+
+> ### Changed
+>
+> - Updated data download method in how-to and tutorial notebooks
+
 ## 2023-08-04
 
 > ### Changed
