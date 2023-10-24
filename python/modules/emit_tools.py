@@ -200,7 +200,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     for var in var_list:
         raw_ds = ds[var].data
         var_dims = ds[var].dims
-        # Apply GLT to dataset - use a copy here otherwise decrementing glt_array from apply_glt will persist
+        # Apply GLT to dataset 
         out_ds = apply_glt(raw_ds,glt_ds, GLT_NODATA_VALUE=GLT_NODATA_VALUE)
         
         # Mask fill values
