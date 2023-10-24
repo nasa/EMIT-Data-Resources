@@ -162,9 +162,10 @@ def apply_glt(ds_array,glt_array,fill_value=-9999,GLT_NODATA_VALUE=0):
     out_ds = np.full((glt_array.shape[0], glt_array.shape[1], ds_array.shape[-1]), fill_value, dtype=np.float32)
     valid_glt = np.all(glt_array != GLT_NODATA_VALUE, axis=-1)
     
-    # Adjust for One based Index
-    glt_array[valid_glt] -= 1 
-    out_ds[valid_glt, :] = ds_array[glt_array[valid_glt, 1], glt_array[valid_glt, 0], :]
+    # Adjust for One based Index - make a copy to prevent decrementing multiple times inside ortho_xr when applying the glt to elev
+    glt_array_copy = glt_array.copy()
+    glt_array_copy[valid_glt] -= 1
+    out_ds[valid_glt, :] = ds_array[glt_array_copy[valid_glt, 1], glt_array_copy[valid_glt, 0], :]
     return out_ds
 
 def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
@@ -199,7 +200,7 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value = -9999):
     for var in var_list:
         raw_ds = ds[var].data
         var_dims = ds[var].dims
-        # Apply GLT to dataset
+        # Apply GLT to dataset 
         out_ds = apply_glt(raw_ds,glt_ds, GLT_NODATA_VALUE=GLT_NODATA_VALUE)
         
         # Mask fill values
