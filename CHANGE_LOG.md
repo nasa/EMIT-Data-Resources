@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
 
+## 2023-11-27
+
+> ### Changed
+>
+> - Updated `emit_tools.py` to fix an issue with `raw_spatial_crop`
+> - Updated some plotting visuals within notebooks
+> - Improved interactive plots in `Exploring_EMIT_L2A_Reflectance`
+> - Renamed `CONTRIBUTE.md` to `CONTRIBUTING.md`
+
 ## 2023-10-23
 
 > ### Changed
