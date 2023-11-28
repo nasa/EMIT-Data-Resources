@@ -4,7 +4,7 @@ like opening and flattening the data to work in xarray, orthorectification, and 
 
 Author: Erik Bolch, ebolch@contractor.usgs.gov 
 
-Last Updated: 06/29/2023
+Last Updated: 11/03/2023
 
 TO DO: 
 - Add units to metadata for ENVI header
@@ -475,7 +475,6 @@ def raw_spatial_crop(ds, shape):
     lon, lat = coord_vects(ds)
     data_vars = {'glt_x':(['latitude','longitude'],ds.glt_x.data),'glt_y':(['latitude','longitude'],ds.glt_y.data)}
     coords = {'latitude':(['latitude'],lat), 'longitude':(['longitude'],lon), 'ortho_y':(['latitude'],ds.ortho_y.data), 'ortho_x':(['longitude'],ds.ortho_x.data)}
-    attrs = ds.attrs
     glt_ds = xr.Dataset(data_vars=data_vars, coords=coords, attrs=ds.attrs)
     glt_ds.rio.write_crs(glt_ds.spatial_ref,inplace=True)
     
@@ -484,14 +483,10 @@ def raw_spatial_crop(ds, shape):
     
     # Pull new geotransform from clipped glt
     clipped_gt = np.array([float(i) for i in clipped['spatial_ref'].GeoTransform.split(' ')]) # THIS GEOTRANSFORM IS OFF BY HALF A PIXEL
-    
-    # Shift Geotransform by half-pixel
-    clipped_gt[0] = clipped_gt[0]+(clipped_gt[1]/2)
-    clipped_gt[3] = clipped_gt[3]+(clipped_gt[5]/2)
-    
-    # Create Crosstrack and Downtrack masks for spatially raw dataset -1 on min is to account for 1 based index. May be a more robust way to do this exists
-    crosstrack_mask = (ds.crosstrack >= np.nanmin(clipped.glt_x.data)-1) & (ds.crosstrack <= np.nanmax(clipped.glt_x.data))
-    downtrack_mask = (ds.downtrack >= np.nanmin(clipped.glt_y.data)-1) & (ds.downtrack <= np.nanmax(clipped.glt_y.data))
+       
+    # Create Crosstrack and Downtrack masks for spatially raw dataset -1 is to account for 1 based index. May be a more robust way to do this exists
+    crosstrack_mask = (ds.crosstrack >= np.nanmin(clipped.glt_x.data)-1) & (ds.crosstrack <= np.nanmax(clipped.glt_x.data)-1)
+    downtrack_mask = (ds.downtrack >= np.nanmin(clipped.glt_y.data)-1) & (ds.downtrack <= np.nanmax(clipped.glt_y.data)-1)
     
     # Mask Areas outside of crosstrack and downtrack covered by the shape
     clipped_ds = ds.where((crosstrack_mask & downtrack_mask), drop=True)
