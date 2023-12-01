@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
 
+## 2023-12-01
+
+> ### Changed
+>
+> - Applied automatic formatting to `emit_tools.py`  
+> - Fixed GLT index adjustment in `raw_spatial_crop` function
+> - Reimplemented `PointerXY` stream so interactive plot from `Exploring EMIT L2A Reflectance` shows spectra at current cursor location
+
 ## 2023-11-27
 
 > ### Changed
