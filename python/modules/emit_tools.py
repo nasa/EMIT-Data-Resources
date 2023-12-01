@@ -585,7 +585,7 @@ def raw_spatial_crop(ds, shape):
     clipped_ds = clipped_ds.drop_vars(["glt_x", "glt_y", "downtrack", "crosstrack"])
 
     # Re-index the GLT to the new array
-    glt_x_data = clipped.glt_x.data - np.nanmin(clipped.glt_x)  # shift to 1 based index
+    glt_x_data = clipped.glt_x.data - np.nanmin(clipped.glt_x)
     glt_y_data = clipped.glt_y.data - np.nanmin(clipped.glt_y)
     clipped_ds = clipped_ds.assign_coords(
         {
