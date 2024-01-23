@@ -1,4 +1,8 @@
+# python internals
 *.ipynb_checkpoints
+*__pycache__*
+
+# local development
 *.img*
 *.envi*
 *.hdr*
@@ -10,5 +14,5 @@
 /python/daac_data_download_python
 /python/emit_utils
 /ignore
-*__pycache__*
 /data/emit_asset_urls.txt
+/.vscode/
