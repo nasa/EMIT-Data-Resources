@@ -1,7 +1,9 @@
 """
-This modules has some functions that simplify working with earthaccess results after they are retrieved. 
-Hopefully this can be added to the earthaccess package in some way.
+This module contains various functions used within the Exploring EMIT
+L2B CH4 plume complexes notebook for searching, wrangling data and visualizations.
 
+Author: Erik Bolch, ebolch@contractor.usgs.gov
+Last Updated: 2024-02-16
 """
 
 # Imports
@@ -11,9 +13,8 @@ import pandas as pd
 import geopandas as gpd
 import shapely
 import earthaccess
-
-
-# Functions
+import asyncio
+import aiohttp
 
 
 def convert_bounds(bbox, invert_y=False):
@@ -125,3 +126,4 @@ def results_to_geopandas(
     # Convert to GeoDataframe
     gdf = gpd.GeoDataFrame(results_df, geometry=geometries, crs="EPSG:4326")
     return gdf
+
