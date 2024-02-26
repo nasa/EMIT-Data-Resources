@@ -7,6 +7,8 @@
 *.envi*
 *.hdr*
 *.nc*
+*.tif*
+*.pptx*
 /data/example_out.csv
 /data/isla_gaviota_3.geojson
 /data/outputs
