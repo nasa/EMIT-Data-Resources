@@ -21,6 +21,7 @@ from spectral.io import envi
 from osgeo import gdal
 import numpy as np
 import math
+from skimage import io
 import pandas as pd
 import geopandas as gpd
 import xarray as xr
@@ -695,3 +696,29 @@ def merge_emit(datasets: dict, gdf: gpd.GeoDataFrame):
     merged_ds = merged_ds.rename({"y": "latitude", "x": "longitude"})
     del transposed_dict, merged
     return merged_ds
+
+
+def ortho_browse(url, glt, spatial_ref, geotransform):
+    """
+    Use an EMIT GLT, geotransform, and spatial ref to orthorectify a browse image. (browse images are in native resolution)
+    """
+    # Read Data
+    data = io.imread(url)
+    # Orthorectify using GLT and transpose so band is first dimension
+    ortho_data = apply_glt(data, glt, fill_value=0).transpose(2, 0, 1)
+    coords = {
+        "y": (
+            ["y"],
+            (geotransform[3] + 0.5 * geotransform[5])
+            + np.arange(glt.shape[0]) * geotransform[5],
+        ),
+        "x": (
+            ["x"],
+            (geotransform[0] + 0.5 * geotransform[1])
+            + np.arange(glt.shape[1]) * geotransform[1],
+        ),
+    }
+    # Place in xarray.datarray
+    da = xr.DataArray(ortho_data, dims=["band", "y", "x"], coords=coords)
+    da.rio.write_crs(spatial_ref, inplace=True)
+    return da
