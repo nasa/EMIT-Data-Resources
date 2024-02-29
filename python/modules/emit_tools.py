@@ -718,6 +718,8 @@ def ortho_browse(url, glt, spatial_ref, geotransform):
             + np.arange(glt.shape[1]) * geotransform[1],
         ),
     }
+    ortho_data = ortho_data.astype(int)
+    ortho_data[ortho_data == -1] = 0
     # Place in xarray.datarray
     da = xr.DataArray(ortho_data, dims=["band", "y", "x"], coords=coords)
     da.rio.write_crs(spatial_ref, inplace=True)
