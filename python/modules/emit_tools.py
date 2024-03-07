@@ -698,14 +698,18 @@ def merge_emit(datasets: dict, gdf: gpd.GeoDataFrame):
     return merged_ds
 
 
-def ortho_browse(url, glt, spatial_ref, geotransform):
+def ortho_browse(url, glt, spatial_ref, geotransform, white_background=True):
     """
     Use an EMIT GLT, geotransform, and spatial ref to orthorectify a browse image. (browse images are in native resolution)
     """
     # Read Data
     data = io.imread(url)
     # Orthorectify using GLT and transpose so band is first dimension
-    ortho_data = apply_glt(data, glt, fill_value=0).transpose(2, 0, 1)
+    if white_background == True:
+        fill = 255
+    else:
+        fill = 0
+    ortho_data = apply_glt(data, glt, fill_value=fill).transpose(2, 0, 1)
     coords = {
         "y": (
             ["y"],
