@@ -9,15 +9,15 @@ _________________________________________________________________________
 
 > ### Added
 >
-> - Added new `Exploring EMIT L2B CH4 Plume Complexes` notebook  
-> - Added new `Understanding CH4 Spectra` notebook
+> - Added new `Visualizing Methane Plume Timeseries` notebook  
+> - Added new `Generating Methane Spectral Fingerprint` notebook
 > - Added new `tutorial_utils.py` module which has functions specific to the new CH4 notebooks  
 
 > ### Changed
 >
 > - Updated `setup_instructions.md` to provide more up to date Python setup instructions  
 > - Updated `README.md` to include new notebooks  
-> - Added some functions to `emit_tools.py` to support the new `Exploring EMIT L2B CH4 Plume Complexes` notebook  
+> - Added some functions to `emit_tools.py` to support the new methane tutorial notebooks
 
 ## 2023-12-01
 
