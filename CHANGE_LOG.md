@@ -5,6 +5,20 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
 
+## 2024-03-13
+
+> ### Added
+>
+> - Added new `Exploring EMIT L2B CH4 Plume Complexes` notebook  
+> - Added new `Understanding CH4 Spectra` notebook
+> - Added new `tutorial_utils.py` module which has functions specific to the new CH4 notebooks  
+
+> ### Changed
+>
+> - Updated `setup_instructions.md` to provide more up to date Python setup instructions  
+> - Updated `README.md` to include new notebooks  
+> - Added some functions to `emit_tools.py` to support the new `Exploring EMIT L2B CH4 Plume Complexes` notebook  
+
 ## 2023-12-01
 
 > ### Changed
