@@ -18,6 +18,7 @@ _________________________________________________________________________
 > - Updated `setup_instructions.md` to provide more up to date Python setup instructions  
 > - Updated `README.md` to include new notebooks  
 > - Added some functions to `emit_tools.py` to support the new methane tutorial notebooks
+> - Minor updates to `How to Extract Area` and `How to Extract Points` notebooks to improve visualizations
 
 ## 2023-12-01
 
