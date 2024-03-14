@@ -21,10 +21,14 @@ from spectral.io import envi
 from osgeo import gdal
 import numpy as np
 import math
+from skimage import io
 import pandas as pd
+import geopandas as gpd
 import xarray as xr
 import rasterio as rio
+import rioxarray as rxr
 import s3fs
+from rioxarray.merge import merge_arrays
 from fsspec.implementations.http import HTTPFile
 
 
@@ -607,3 +611,120 @@ def raw_spatial_crop(ds, shape):
     )
 
     return clipped_ds
+
+
+def is_adjacent(scene: str, same_orbit: list):
+    """
+    This function makes a list of scene numbers from the same orbit as integers and checks
+    if they are adjacent/sequential.
+    """
+    scene_nums = [int(scene.split(".")[-2].split("_")[-1]) for scene in same_orbit]
+    return all(b - a == 1 for a, b in zip(scene_nums[:-1], scene_nums[1:]))
+
+
+def merge_emit(datasets: dict, gdf: gpd.GeoDataFrame):
+    """
+    A function to merge xarray datasets formatted using emit_xarray. This could probably be improved,
+    lots of shuffling data around to keep in xarray and get it to merge properly. Note: GDF may only work with a
+    single geometry.
+    """
+    nested_data_arrays = {}
+    # loop over datasets
+    for dataset in datasets:
+        # create dictionary of arrays for each dataset
+
+        # create dictionary of 1D variables, which should be consistent across datasets
+        one_d_arrays = {}
+
+        # Dictionary of variables to merge
+        data_arrays = {}
+        # Loop over variables in dataset including elevation
+        for var in list(datasets[dataset].data_vars) + ["elev"]:
+            # Get 1D for this variable and add to dictionary
+            if not one_d_arrays:
+                # These should be an array describing the others (wavelengths, mask_bands, etc.)
+                one_dim = [
+                    item
+                    for item in list(datasets[dataset].coords)
+                    if item not in ["latitude", "longitude", "spatial_ref"]
+                    and len(datasets[dataset][item].dims) == 1
+                ]
+                # print(one_dim)
+                for od in one_dim:
+                    one_d_arrays[od] = datasets[dataset].coords[od].data
+
+                # Update format for merging - This could probably be improved
+            da = datasets[dataset][var].reset_coords("elev", drop=False)
+            da = da.rename({"latitude": "y", "longitude": "x"})
+            if len(da.dims) == 3:
+                if any(item in list(da.coords) for item in one_dim):
+                    da = da.drop_vars(one_dim)
+                da = da.drop_vars("elev")
+                da = da.to_array(name=var).squeeze("variable", drop=True)
+                da = da.transpose(da.dims[-1], da.dims[0], da.dims[1])
+                # print(da.dims)
+            if var == "elev":
+                da = da.to_array(name=var).squeeze("variable", drop=True)
+            data_arrays[var] = da
+            nested_data_arrays[dataset] = data_arrays
+
+            # Transpose the nested arrays dict. This is horrible to read, but works to pair up variables (ie mask) from the different granules
+    transposed_dict = {
+        inner_key: {
+            outer_key: inner_dict[inner_key]
+            for outer_key, inner_dict in nested_data_arrays.items()
+        }
+        for inner_key in nested_data_arrays[next(iter(nested_data_arrays))]
+    }
+
+    # remove some unused data
+    del nested_data_arrays, data_arrays, da
+
+    # Merge the arrays using rioxarray.merge_arrays()
+    merged = {}
+    for _var in transposed_dict:
+        merged[_var] = merge_arrays(
+            list(transposed_dict[_var].values()),
+            bounds=gdf.unary_union.bounds,
+            nodata=np.nan,
+        )
+
+    # Create a new xarray dataset from the merged arrays
+    # Create Merged Dataset
+    merged_ds = xr.Dataset(data_vars=merged, coords=one_d_arrays)
+    # Rename x and y to longitude and latitude
+    merged_ds = merged_ds.rename({"y": "latitude", "x": "longitude"})
+    del transposed_dict, merged
+    return merged_ds
+
+
+def ortho_browse(url, glt, spatial_ref, geotransform, white_background=True):
+    """
+    Use an EMIT GLT, geotransform, and spatial ref to orthorectify a browse image. (browse images are in native resolution)
+    """
+    # Read Data
+    data = io.imread(url)
+    # Orthorectify using GLT and transpose so band is first dimension
+    if white_background == True:
+        fill = 255
+    else:
+        fill = 0
+    ortho_data = apply_glt(data, glt, fill_value=fill).transpose(2, 0, 1)
+    coords = {
+        "y": (
+            ["y"],
+            (geotransform[3] + 0.5 * geotransform[5])
+            + np.arange(glt.shape[0]) * geotransform[5],
+        ),
+        "x": (
+            ["x"],
+            (geotransform[0] + 0.5 * geotransform[1])
+            + np.arange(glt.shape[1]) * geotransform[1],
+        ),
+    }
+    ortho_data = ortho_data.astype(int)
+    ortho_data[ortho_data == -1] = 0
+    # Place in xarray.datarray
+    da = xr.DataArray(ortho_data, dims=["band", "y", "x"], coords=coords)
+    da.rio.write_crs(spatial_ref, inplace=True)
+    return da
