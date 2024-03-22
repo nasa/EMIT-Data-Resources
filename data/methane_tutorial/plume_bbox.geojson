@@ -1,0 +1,7 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "plume_bbox" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 36.1075296, 31.8092048 ], [ 36.2805017, 31.8092048 ], [ 36.2805017, 32.1274953 ], [ 36.1075296, 32.1274953 ], [ 36.1075296, 31.8092048 ] ] ] } }
+]
+}
