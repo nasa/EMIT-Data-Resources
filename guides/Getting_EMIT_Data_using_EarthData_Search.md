@@ -35,7 +35,7 @@ To view the scenes and location, click on the image to focus it on the map the l
 
 ![Earthdata Landing Page](https://i.imgur.com/cdOsgm3.png)
 
-You can also access S3 information (e.g., AWS region, bucket, temperorary credentials for S3 access, and file names)
+You can also access S3 information (e.g., AWS region, bucket, temporary credentials for S3 access, and file names)
 
 ![Earthdata Landing Page](https://i.imgur.com/Y4jVdD0.png)
 
