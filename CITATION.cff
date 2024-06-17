@@ -1,35 +1,57 @@
 cff-version: 1.2.0
 title: EMIT Data Resources
 message: >-
-  If you use this collection of resources in your research we would appreciate an appropriate citation. 
+  If you use this collection of resources in your research
+  we would appreciate an appropriate citation.
 type: software
 authors:
-  - given-names: Erik A Bolch
+  - given-names: Erik A
+    family-names: Bolch
     affiliation: >-
-      KBR, Inc., Contractor to the U.S. Geological Survey, Earth Resources Observation and Science Center, National Aeronautics and Space Administration Land Processes Distributed Active Archive Center
+      KBR, Inc., Contractor to the U.S. Geological Survey,
+      Earth Resources Observation and Science Center,
+      National Aeronautics and Space Administration Land
+      Processes Distributed Active Archive Center
     orcid: 'https://orcid.org/0000-0003-2470-4048'
-  - given-names: Aaron M Friesz
+  - given-names: Aaron M
+    family-names: Friesz
     affiliation: >-
-      KBR, Inc., Contractor to the U.S. Geological Survey, Earth Resources Observation and Science Center, National Aeronautics and Space Administration Land Processes Distributed Active Archive Center
+      KBR, Inc., Contractor to the U.S. Geological Survey,
+      Earth Resources Observation and Science Center,
+      National Aeronautics and Space Administration Land
+      Processes Distributed Active Archive Center
     orcid: 'https://orcid.org/0000-0003-4096-3824'
-  - given-names: Mahsa Jami
+  - given-names: Mahsa
+    family-names: Jami
     affiliation: >-
-      KBR, Inc., Contractor to the U.S. Geological Survey, Earth Resources Observation and Science Center, National Aeronautics and Space Administration Land Processes Distributed Active Archive Center
+      KBR, Inc., Contractor to the U.S. Geological Survey,
+      Earth Resources Observation and Science Center,
+      National Aeronautics and Space Administration Land
+      Processes Distributed Active Archive Center
     orcid: 'https://orcid.org/0000-0002-3594-3004'
-  - given-names: Brianna M Lind
+  - given-names: Brianna M
+    family-names: Lind
     affiliation: >-
-      KBR, Inc., Contractor to the U.S. Geological Survey, Earth Resources Observation and Science Center, National Aeronautics and Space Administration Land Processes Distributed Active Archive Center
+      KBR, Inc., Contractor to the U.S. Geological Survey,
+      Earth Resources Observation and Science Center,
+      National Aeronautics and Space Administration Land
+      Processes Distributed Active Archive Center
     orcid: 'https://orcid.org/0000-0002-5306-9963'
-  - given-names: Philip G Brodrick
+  - given-names: Philip G
+    family-names: Brodrick
     affiliation: >-
-    Jet Propulsion Laboratory, California Institute of Technology
+      Jet Propulsion Laboratory, California Institute of
+      Technology
     orcid: 'https://orcid.org/0000-0001-9497-7661'
-  - given-names: K Dana Chadwick
+  - given-names: K Dana
+    family-names: Chadwick
     affiliation: >-
-    Jet Propulsion Laboratory, California Institute of Technology
+      Jet Propulsion Laboratory, California Institute of
+      Technology
     orcid: 'https://orcid.org/0000-0002-5633-4865'
 repository-code: 'https://github.com/nasa/EMIT-Data-Resources'
 abstract: >-
-This repository contains guides and Jupyter Notebook examples to help users access and work with data from the Earth Surface Mineral Dust Source Investigation (EMIT) mission.
+  This repository contains guides and Jupyter Notebooks to
+  help users access and work with data from the Earth
+  Surface Mineral Dust Source Investigation (EMIT) mission.
 license: Apache-2.0
-version: 2.0.0
