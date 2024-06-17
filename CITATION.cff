@@ -49,6 +49,14 @@ authors:
       Jet Propulsion Laboratory, California Institute of
       Technology
     orcid: 'https://orcid.org/0000-0002-5633-4865'
+  - given-names: Cole K
+    family-names: Krehbiel
+    affiliation: >-
+      National Aeronautics and Space Administration Land
+      Processes Distributed Active Archive Center,
+      U.S. Geological Survey, Earth Resources 
+      Observation and Science Center
+    orcid: 'https://orcid.org/0000-0003-2645-3449'
 repository-code: 'https://github.com/nasa/EMIT-Data-Resources'
 abstract: >-
   This repository contains guides and Jupyter Notebooks to
