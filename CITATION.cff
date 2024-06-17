@@ -32,3 +32,4 @@ repository-code: 'https://github.com/nasa/EMIT-Data-Resources'
 abstract: >-
 This repository contains guides and Jupyter Notebook examples to help users access and work with data from the Earth Surface Mineral Dust Source Investigation (EMIT) mission.
 license: Apache-2.0
+version: 2.0.0
