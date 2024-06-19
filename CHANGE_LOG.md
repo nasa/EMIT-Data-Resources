@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
 
+## 2024-06-17
+
+> ### Added
+>
+> - Add CITATION.cff file to provide a citation for the repository
+
+> ### Changed
+>
+> - Removed use of `nan` for fill_values to be more consistent with EMIT datasets. This means that users will have to manually assign them before plotting.
+> - Updated notebooks to include the new fill_value behavior, and assign them to `np.nan` for visualizations
+> - Replaced `raw_spatial_crop` with `spatial_subset` function to subset EMIT data spatially before applying orthorectification
+> - Fixed typos in Earthdata Search Guide
+
 ## 2024-03-22
 
 > ### Added

@@ -12,7 +12,7 @@ Enter your Earthdata Login credentials (username/password)
 
 ## Step 2. Finding EMIT Data
 
-1. In the top left poriton of the screen type in "EMIT" (quotes will limit results to an exact match). This will search for all available EMIT collections.
+1. In the top left portion of the screen type in "EMIT" (quotes will limit results to an exact match). This will search for all available EMIT collections.
 
 ![Earthdata Landing Page](https://i.imgur.com/UeuG3bd.jpeg)
 
@@ -35,7 +35,7 @@ To view the scenes and location, click on the image to focus it on the map the l
 
 ![Earthdata Landing Page](https://i.imgur.com/cdOsgm3.png)
 
-You can also access S3 information (e.g., AWS region, bucket, temperorary credentials for S3 access, and file names)
+You can also access S3 information (e.g., AWS region, bucket, temporary credentials for S3 access, and file names)
 
 ![Earthdata Landing Page](https://i.imgur.com/Y4jVdD0.png)
 
@@ -65,12 +65,12 @@ The **AWS S3 Access** tab provides the  *s3://* links, which is what we would us
 
 ---
 
-## Contact Info:  
+## Contact Info  
 
-Email: LPDAAC@usgs.gov  
+Email: <LPDAAC@usgs.gov>  
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 01-11-2023  
+Date last modified: 06-05-2024  
 
-¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
+¹Work performed under USGS contract 140G0121D0001 for NASA contract NNG14HH33I.  
