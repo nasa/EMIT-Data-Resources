@@ -4,35 +4,53 @@
 
 QGIS can be used to stream NASA Earthdata cloud-optimized geotiff files. To do this QGIS uses https and the vsicurl virtual file system handler. This guide will show you how to configure QGIS to do this. There are 4 steps needed.
 
-1. Configure QGIS Authentication
+1. Create a `.netrc` file
 2. Add Custom Environment Variables
 3. Restart QGIS
 4. Add Data
 
-## 1. Configure QGIS Authentication
+## 1. Create a .netrc file
 
-After opening QGIS open the options sub-menu from the settings menu.
+Under the hood QGIS uses gdal and vsicurl to stream data via https. For NASA Earthdata, this requires a `.netrc` file to store your Earthdata login credentials. If you already have one, you can skip this step. This file should be located in your home directory. Choose one of the methods below to create the file and enter your credentials.
 
-![Select Options from the Settings Menu](../img/settings-options.png)
+### A. Manual Set Up
 
-Select the Authentication tab on the left-hand side and then the plus sign to add a new authentication configuration. When you do this, you will be prompted to set a master password for all of your QGIS authentications to protect credentials. Create a strong password and be sure to remember or keep it in a safe location.
+- Download the [.netrc template file](https://github.com/nasa/LPDAAC-Data-Resources/tree/main/data/.netrc) and save it in your *home/userprofile/* directory, where *userprofile* is your personal user directory. For example: `C:\Users\userprofile\.netrc` or `home/userprofile/.netrc.`  
+- Open the `.netrc` file in a text editor and replace <USERNAME> with your NASA Earthdata Login username and <PASSWORD> with your NASA Earthdata Login password.
 
-![Select Authentication and Create Password](../img/authentication.png)
+### B. Command Line  
 
-After this, you will be able to add an authentication entry. You can name this 'NASA EDL' and select 'OAuth2 authentication' as the type from the dropdown. This will expand the configuration options, where you can enter the following information:
+**For Linux/MacOS:**
 
-Request URL: <https://urs.earthdata.nasa.gov>
-Token URL: <https://urs.earthdata.nasa.gov/api/users/tokens>
-Client ID: Your NASA Earthdata Login username
-Client Secret: Your NASA Earthdata Login password
+To Create a .netrc file, enter the following in the command line.
 
-Lastly, you can also check the box under advanced to persist between launches.
+```bash
+touch ~/.netrc | chmod og-rw ~/.netrc | echo machine urs.earthdata.nasa.gov >> ~/.netrc
+```
 
-![Authentication Fields to Update](../img/authentication_fields.png)
+To insert your NASA Earthdata login username and password into the file, enter the following in the Command Prompt and replace your username and password.
+
+```bash
+echo login Insert_Your_Username >> ~/.netrc | echo password Insert_Your_Password >> ~/.netrc
+```
+
+**For Windows:**
+
+To Create a .netrc file, enter the following in the command line.
+
+```cmd
+NUL >> %userprofile%\.netrc | echo machine urs.earthdata.nasa.gov >> %userprofile%\.netrc
+```
+
+To insert your NASA Earthdata login username and password into the file, enter the following in the Command Prompt and replace your username and password.
+
+```cmd
+echo login Insert_Your_Username >> %userprofile%\.netrc | echo password Insert_Your_Password >> %userprofile%\.netrc
+```
 
 ## 2. Environment Settings
 
-Next, while still in the settings menu, select system on the left-hand side, then scroll down Environment. Select the check box and enter the Variables and Values in the table below by clicking the plus sign to add a new variable. These variables, set up a place for cookies to be stored and read from, prevent GDAL from reading all files in the directory, specify the extensions GDAL is allowed to access over HTTPS using the vsicurl virtual file system handler, and allow use of unsafe SSL connections (use with caution).
+Next, while still in the **Settings** menu, select **System** on the left-hand side, then scroll down to **Environment**. Select the check box and enter the Variables and Values in the table below by clicking the plus sign to add a new variable. These variables, set up a place for cookies to be stored and read from, prevent GDAL from reading all files in the directory, specify the extensions GDAL is allowed to access over HTTPS using the vsicurl virtual file system handler, and allow use of unsafe SSL connections (use with caution).
 
 |Variable|Value|
 | ----------- | ----------- |
@@ -68,6 +86,6 @@ Email: <LPDAAC@usgs.gov>
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 06-19-2024  
+Date last modified: 06-20-2024  
 
 ¹Work performed under USGS contract 140G0121D0001 for NASA contract NNG14HH33I.  
