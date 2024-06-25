@@ -78,7 +78,7 @@ This should add the data to your map, and will work with any NASA Earthdata host
 
 ![Added Scene](../img/example_scene.png)
 
->**If these instructions do not work, please verify that your `.netrc` file has the correct username and password, and is formatted as shown in section .**
+>**If these instructions do not work, please verify that your `.netrc` file has the correct username and password, and is formatted as shown in [Section 1](#1-create-a-netrc-file).**
 
 ## Contact Info  
 
