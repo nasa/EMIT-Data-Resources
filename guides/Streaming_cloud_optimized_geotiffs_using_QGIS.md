@@ -15,38 +15,36 @@ Under the hood QGIS uses gdal and vsicurl to stream data via https. For NASA Ear
 
 ### A. Manual Set Up
 
-- Download the [.netrc template file](https://github.com/nasa/LPDAAC-Data-Resources/tree/main/data/.netrc) and save it in your *home/userprofile/* directory, where *userprofile* is your personal user directory. For example: `C:\Users\userprofile\.netrc` or `home/userprofile/.netrc.`  
+- Download the [.netrc template file](https://github.com/nasa/LPDAAC-Data-Resources/tree/main/data/.netrc) and save it in your *home/user/* directory, where *user* is your personal user directory. For example: `C:\Users\user\.netrc` or `home/user/.netrc.`  
 - Open the `.netrc` file in a text editor and replace <USERNAME> with your NASA Earthdata Login username and <PASSWORD> with your NASA Earthdata Login password.
+
+After editing, the file should look something like this:
+
+![Example .netrc 1](../img/example_netrc1.png)
+
+or you can also have everything on a single line separated by spaces, like:
+
+![example .netrc 2](../img/example_netrc2.png)
 
 ### B. Command Line  
 
 **For Linux/MacOS:**
 
-To Create a .netrc file, enter the following in the command line.
+To Create a .netrc file, enter the following in the command line, replacing <USERNAME> and <PASSWORD> with your NASA Earthdata username and password. This will create a file in your home directory or append your NASA credentials to an existing file.
 
 ```bash
-touch ~/.netrc | chmod og-rw ~/.netrc | echo machine urs.earthdata.nasa.gov >> ~/.netrc
-```
-
-To insert your NASA Earthdata login username and password into the file, enter the following in the Command Prompt and replace your username and password.
-
-```bash
-echo login Insert_Your_Username >> ~/.netrc | echo password Insert_Your_Password >> ~/.netrc
+echo "machine urs.earthdata.nasa.gov login <USERNAME> password <PASSWORD>" >>~/.netrc
 ```
 
 **For Windows:**
 
-To Create a .netrc file, enter the following in the command line.
+To Create a .netrc file, enter the following in the command line, replacing <USERNAME> and <PASSWORD> with your NASA Earthdata username and password. This will create a file in your home directory or append your NASA credentials to an existing file.
 
 ```cmd
-NUL >> %userprofile%\.netrc | echo machine urs.earthdata.nasa.gov >> %userprofile%\.netrc
+echo machine urs.earthdata.nasa.gov login <USERNAME> password <PASSWORD> >> %userprofile%\.netrc
 ```
 
-To insert your NASA Earthdata login username and password into the file, enter the following in the Command Prompt and replace your username and password.
-
-```cmd
-echo login Insert_Your_Username >> %userprofile%\.netrc | echo password Insert_Your_Password >> %userprofile%\.netrc
-```
+You can verify that the file is correct by opening with a text editor. It should look like an example in one of the figures above.
 
 ## 2. Environment Settings
 
@@ -80,12 +78,14 @@ This should add the data to your map, and will work with any NASA Earthdata host
 
 ![Added Scene](../img/example_scene.png)
 
+>**If these instructions do not work, please verify that your `.netrc` file has the correct username and password, and is formatted as shown in section .**
+
 ## Contact Info  
 
 Email: <LPDAAC@usgs.gov>  
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 06-20-2024  
+Date last modified: 06-25-2024  
 
 ¹Work performed under USGS contract 140G0121D0001 for NASA contract NNG14HH33I.  
