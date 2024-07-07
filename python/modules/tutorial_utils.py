@@ -102,6 +102,8 @@ def results_to_geopandas(
     results_df = flattent_column_names(results_df)
     if len(fields) == 0:
         fields = default_fields
+    else:
+        fields = list(set(fields + default_fields))
 
     results_df = results_df.drop(
         columns=[col for col in results_df.columns if col not in fields]
@@ -126,4 +128,3 @@ def results_to_geopandas(
     # Convert to GeoDataframe
     gdf = gpd.GeoDataFrame(results_df, geometry=geometries, crs="EPSG:4326")
     return gdf
-
