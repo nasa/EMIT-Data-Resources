@@ -26,6 +26,8 @@ Below are the resources available for EMIT Data.
 |[Exploring EMIT L2A Reflectance](python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb)|Jupyter Notebook|Explore EMIT L2A Reflectance data using interactive plots|
 |[Visualizing Methane Plume Timeseries](python/tutorials/Visualizing_Methane_Plume_Timeseries.ipynb)|Jupyter Notebook|Find EMIT L2B CH4 Plume Data and build a timeseries of CH4 plume complexes|
 |[Generating_Methane_Spectral_Fingerprint](python/tutorials/Generating_Methane_Spectral_Fingerprint.ipynb)|Jupyter Notebook|Extract Radiance Spectra and build an in-plume/out-of-plume ratio to compare with CH4 absorption coefficient|
+|[Finding_EMIT_L2B_Data](python/tutorials/Finding_EMIT_L2B_Data.ipynb)|Jupyter Notebook|Use the `earthaccess` Python library to find EMIT L2B Mineral Identification Band Depth and Uncertainty data|
+|[Working with EMIT L2B Mineralogy](python/tutorials/Working_with_EMIT_L2B_Mineralogy.ipynb)|Jupytter Notebook|Work with the EMIT L2B Mineral Identification Band Depth and Uncertainty Data and aggregate individual spectral library constituents into the EMIT-10 minerals and estimate abundance| 
 |[How to find and access EMIT data](python/how-tos/How_to_find_and_access_EMIT_data.ipynb)|Jupyter Notebook|Use the `earthaccess` Python library to find and download or stream EMIT data|
 |[How to Convert to ENVI Format](python/how-tos/How_to_Convert_to_ENVI.ipynb)|Jupyter Notebook|Convert from downloaded netCDF4 (.nc) format to .envi format|
 |[How to Orthorectify](python/how-tos/How_to_Orthorectify.ipynb)|Jupyter Notebook|Use the geometry lookup table (GLT) included with the EMIT netCDF4 file to project on a geospatial grid (EPSG:4326)|
@@ -64,6 +66,6 @@ Email: <LPDAAC@usgs.gov>
 Voice: +1-866-573-3222  
 Organization: Land Processes Distributed Active Archive Center (LP DAAC)¹  
 Website: <https://lpdaac.usgs.gov/>  
-Date last modified: 03-13-2024  
+Date last modified: 08-01-2024  
 
 ¹Work performed under USGS contract G15PD00467 for NASA contract NNG14HH33I.  
