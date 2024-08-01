@@ -23,6 +23,7 @@ Below are the resources available for EMIT Data.
 |Name|Type|Summary|
 |:---|:---|:---|
 |[Getting EMIT Data using EarthData Search](guides/Getting_EMIT_Data_using_EarthData_Search.md)|Markdown Guide|A thorough walkthrough for using [EarthData Search](https://search.earthdata.nasa.gov/search) to find and download EMIT data|
+|[Streaming NASA Earthdata Cloud-Optimized GeoTIFFs using QGIS](guides/Streaming_cloud_optimized_geotiffs_using_QGIS.md)|Markdown Guide|A walkthrough to set up QGIS to stream cloud-optimized geotiff files from NASA Earthdata|
 |[Exploring EMIT L2A Reflectance](python/tutorials/Exploring_EMIT_L2A_Reflectance.ipynb)|Jupyter Notebook|Explore EMIT L2A Reflectance data using interactive plots|
 |[Visualizing Methane Plume Timeseries](python/tutorials/Visualizing_Methane_Plume_Timeseries.ipynb)|Jupyter Notebook|Find EMIT L2B CH4 Plume Data and build a timeseries of CH4 plume complexes|
 |[Generating_Methane_Spectral_Fingerprint](python/tutorials/Generating_Methane_Spectral_Fingerprint.ipynb)|Jupyter Notebook|Extract Radiance Spectra and build an in-plume/out-of-plume ratio to compare with CH4 absorption coefficient|
