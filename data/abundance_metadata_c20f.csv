@@ -1,0 +1,18 @@
+Tetracorder list reference,mineral,delta_k_absorption_coefficient,density_g_cc,Reflectance Wavelength (microns),grain_diameter_microns
+lists.of.files.by.mineral/calcite.group2.txt,calcite,10.51,2.71,2.18,20
+lists.of.files.by.mineral/chlorite.group2.txt,chlorite,76.96,2.8,2.14,11
+lists.of.files.by.mineral/dolomite.group2.txt,dolomite,10.51,2.84,2.17,20
+lists.of.files.by.mineral/goethite-nano.group1.txt,goethite-nano,1000,3.8,0.76,0.05
+lists.of.files.by.mineral/goethite-fine.group1.txt,goethite-fine,5120,3.8,0.76,1
+lists.of.files.by.mineral/goethite-med.group1.txt,goethite-med,5120,3.8,0.76,2
+lists.of.files.by.mineral/goethite-large.group1.txt,goethite-large,5120,3.8,0.76,5
+lists.of.files.by.mineral/gypsum-fine.group2.txt,gypsum-fine,50,2.36,2.09,5
+lists.of.files.by.mineral/gypsum-coarse.group2.txt,gypsum-coarse,50,2.36,2.09,20
+lists.of.files.by.mineral/hematite-nano.group1.txt,hematite-nano,1304,5.3,0.75,0.05
+lists.of.files.by.mineral/hematite-fine.group1.txt,hematite-fine,6400,5.3,0.75,1
+lists.of.files.by.mineral/hematite-med.group1.txt,hematite-med,6400,5.3,0.75,2
+lists.of.files.by.mineral/hematite-large.group1.txt,hematite-large,6400,5.3,0.75,5
+lists.of.files.by.mineral/illite+muscovite.group2.txt,illite+muscovite,91.2,2.78,2.14,2
+lists.of.files.by.mineral/kaolinite.group2.txt,kaolinite,181,2.6,2.11,2
+lists.of.files.by.mineral/montmorillonite.group2.txt,montmorillonite,100,2.35,2.12,2
+lists.of.files.by.mineral/vermiculite.group2.txt,vermiculite,100,2.5,2.15,10
