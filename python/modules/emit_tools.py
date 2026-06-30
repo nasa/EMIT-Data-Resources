@@ -20,12 +20,11 @@ import numpy as np
 import math
 from skimage import io
 import pandas as pd
-import geopandas as gpd
 import xarray as xr
 import rasterio as rio
 import rioxarray as rxr
 import s3fs
-from rioxarray.merge import merge_arrays
+from rioxarray.merge import merge_datasets
 from fsspec.implementations.http import HTTPFile
 
 
@@ -48,6 +47,8 @@ def emit_xarray(filepath, ortho=False, qmask=None, unpacked_bmask=None):
     if type(filepath) == s3fs.core.S3File:
         granule_id = filepath.info()["name"].split("/", -1)[-1].split(".", -1)[0]
     elif type(filepath) == HTTPFile:
+        granule_id = filepath.path.split("/", -1)[-1].split(".", -1)[0]
+    elif hasattr(filepath, 'path'):
         granule_id = filepath.path.split("/", -1)[-1].split(".", -1)[0]
     else:
         granule_id = os.path.splitext(os.path.basename(filepath))[0]
@@ -624,80 +625,76 @@ def is_adjacent(scene: str, same_orbit: list):
     return all(b - a == 1 for a, b in zip(scene_nums[:-1], scene_nums[1:]))
 
 
-def merge_emit(datasets: dict, gdf: gpd.GeoDataFrame):
+def merge_emit(datasets, bounds=None, nodata=-9999):
     """
-    A function to merge xarray datasets formatted using emit_xarray. This could probably be improved,
-    lots of shuffling data around to keep in xarray and get it to merge properly. Note: GDF may only work with a
-    single geometry.
+    This function merges adjacent emit scenes. If pixels aren't align it matches the first
+    in the list.
+
+    Parameters
+    datasets : dict[str, xr.Dataset] | list[xr.Dataset]
+        Orthorectified EMIT datasets (from emit_xarray(..., ortho=True)).
+    bounds : tuple (minx, miny, maxx, maxy) | GeoDataFrame | None
+        Output extent. A GeoDataFrame uses .total_bounds. None = combined extent.
+    nodata : numeric
+        Fill value. Defaults to EMIT's -9999.
     """
-    nested_data_arrays = {}
-    # loop over datasets
-    for dataset in datasets:
-        # create dictionary of arrays for each dataset
+    if isinstance(datasets, dict):
+        datasets = list(datasets.values())
+    if bounds is not None and hasattr(bounds, "total_bounds"):
+        bounds = tuple(bounds.total_bounds)
 
-        # create dictionary of 1D variables, which should be consistent across datasets
-        one_d_arrays = {}
+    def _prep(ds):
+        ds = ds.copy()
+        if "elev" in ds.coords and "elev" not in ds.data_vars:
+            ds = ds.reset_coords("elev")
+        ds = ds.rename({"latitude": "y", "longitude": "x"})
+        # reorder dims - rioxarray.merge expects 3D arrays as (band, y, x)
+        for v in ds.data_vars:
+            if ds[v].ndim == 3:
+                band_dim = next(d for d in ds[v].dims if d not in ("y", "x"))
+                ds[v] = ds[v].transpose(band_dim, "y", "x")
+        return ds
 
-        # Dictionary of variables to merge
-        data_arrays = {}
-        # Loop over variables in dataset including elevation
-        for var in list(datasets[dataset].data_vars) + ["elev"]:
-            # Get 1D for this variable and add to dictionary
-            if not one_d_arrays:
-                # These should be an array describing the others (wavelengths, mask_bands, etc.)
-                one_dim = [
-                    item
-                    for item in list(datasets[dataset].coords)
-                    if item not in ["latitude", "longitude", "spatial_ref"]
-                    and len(datasets[dataset][item].dims) == 1
-                ]
-                # print(one_dim)
-                for od in one_dim:
-                    one_d_arrays[od] = datasets[dataset].coords[od].data
+    prepped = [_prep(ds) for ds in datasets]
+    src = datasets[0]
 
-                # Update format for merging - This could probably be improved
-            da = datasets[dataset][var].reset_coords("elev", drop=False)
-            da = da.rename({"latitude": "y", "longitude": "x"})
-            if len(da.dims) == 3:
-                if any(item in list(da.coords) for item in one_dim):
-                    da = da.drop_vars(one_dim)
-                da = da.drop_vars("elev")
-                da = da.to_array(name=var).squeeze("variable", drop=True)
-                da = da.transpose(da.dims[-1], da.dims[0], da.dims[1])
-                # print(da.dims)
-            if var == "elev":
-                da = da.to_array(name=var).squeeze("variable", drop=True)
-            data_arrays[var] = da
-            nested_data_arrays[dataset] = data_arrays
-
-            # Transpose the nested arrays dict. This is horrible to read, but works to pair up variables (ie mask) from the different granules
-    transposed_dict = {
-        inner_key: {
-            outer_key: inner_dict[inner_key]
-            for outer_key, inner_dict in nested_data_arrays.items()
-        }
-        for inner_key in nested_data_arrays[next(iter(nested_data_arrays))]
+    shared_coords = {
+        n: src.coords[n]
+        for n in src.coords
+        if src.coords[n].ndim == 1
+        and n not in ("y", "x", "latitude", "longitude")
     }
 
-    # remove some unused data
-    del nested_data_arrays, data_arrays, da
+    merged = merge_datasets(prepped, bounds=bounds, nodata=nodata)
+    merged = merged.rename({"y": "latitude", "x": "longitude"})
+    merged = merged.assign_coords(shared_coords)
 
-    # Merge the arrays using rioxarray.merge_arrays()
-    merged = {}
-    for _var in transposed_dict:
-        merged[_var] = merge_arrays(
-            list(transposed_dict[_var].values()),
-            bounds=gdf.unary_union.bounds,
-            nodata=-9999,
-        )
+    merged.attrs = dict(src.attrs)
+    for v in merged.data_vars:
+        if v in src.data_vars:
+            merged[v].attrs = dict(src[v].attrs)
+        elif v in src.coords:
+            merged[v].attrs = dict(src.coords[v].attrs)
+    for c in merged.coords:
+        if c in src.coords:
+            merged.coords[c].attrs = dict(src.coords[c].attrs)
 
-    # Create a new xarray dataset from the merged arrays
-    # Create Merged Dataset
-    merged_ds = xr.Dataset(data_vars=merged, coords=one_d_arrays)
-    # Rename x and y to longitude and latitude
-    merged_ds = merged_ds.rename({"y": "latitude", "x": "longitude"})
-    del transposed_dict, merged
-    return merged_ds
+    if "elev" in merged.data_vars:
+        merged = merged.set_coords("elev")
+
+    # Restore (y, x, band) dim order
+    for v in merged.data_vars:
+        if merged[v].ndim == 3:
+            band_dim = next(
+                d for d in merged[v].dims if d not in ("latitude", "longitude")
+            )
+            merged[v] = merged[v].transpose("latitude", "longitude", band_dim)
+
+    # Set _FillValue
+    for v in merged.data_vars:
+        merged[v].encoding["_FillValue"] = nodata
+
+    return merged
 
 
 def ortho_browse(url, glt, spatial_ref, geotransform, white_background=True):
