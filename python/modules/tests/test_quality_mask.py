@@ -29,8 +29,8 @@ An optional test also runs against a real granule when the environment variable
 import os
 
 import numpy as np
-import netCDF4 as nc
 import pytest
+import xarray as xr
 
 from emit_tools import quality_mask
 
@@ -67,31 +67,57 @@ V001_MASK_BANDS = [
 ]
 
 
-def _write_mask_nc(path, band_names, mask_array):
-    """Write a minimal EMIT-like L2A Mask netCDF file.
+def _write_mask_nc(path, band_names, mask_array, fill_value=None):
+    """Write a minimal EMIT-like L2A Mask netCDF file with the h5netcdf backend.
 
     Structure mirrors the real product: a root ``mask`` variable with dims
     ``(downtrack, crosstrack, bands)`` and a ``sensor_band_parameters`` group
-    holding the ``mask_bands`` string variable.
+    holding the ``mask_bands`` string variable. Uses only xarray + h5netcdf (both
+    already required by emit_tools), so the tests add no netCDF backend
+    dependency. When ``fill_value`` is given, the ``mask`` variable declares that
+    ``_FillValue`` (the real V002 product declares ``_FillValue = -9999``, which
+    xarray decodes to NaN on read).
     """
-    downtrack, crosstrack, n_bands = mask_array.shape
-    assert n_bands == len(band_names)
-    with nc.Dataset(path, "w", format="NETCDF4") as ds:
-        ds.createDimension("downtrack", downtrack)
-        ds.createDimension("crosstrack", crosstrack)
-        ds.createDimension("bands", n_bands)
-        mask_var = ds.createVariable(
-            "mask", "f4", ("downtrack", "crosstrack", "bands")
-        )
-        mask_var[:] = mask_array.astype("f4")
-        mask_var.long_name = "Masks"
-        mask_var.units = "unitless"
-        grp = ds.createGroup("sensor_band_parameters")
-        band_var = grp.createVariable("mask_bands", str, ("bands",))
-        for i, name in enumerate(band_names):
-            band_var[i] = name
-        band_var.long_name = "Mask Band Names"
-    return str(path)
+    path = str(path)
+    root = xr.Dataset(
+        {"mask": (("downtrack", "crosstrack", "bands"), mask_array.astype("float32"))}
+    )
+    root["mask"].attrs = {"long_name": "Masks", "units": "unitless"}
+    encoding = None if fill_value is None else {"mask": {"_FillValue": fill_value}}
+    root.to_netcdf(path, engine="h5netcdf", encoding=encoding)
+    sbp = xr.Dataset({"mask_bands": (("bands",), np.array(band_names))})
+    sbp["mask_bands"].attrs = {"long_name": "Mask Band Names"}
+    sbp.to_netcdf(path, engine="h5netcdf", group="sensor_band_parameters", mode="a")
+    return path
+
+
+class _DatasetSpy:
+    """Transparent proxy around an xarray Dataset that records ``close()``.
+
+    Used to prove ``quality_mask`` closes the file handles it opens (including
+    on error) without depending on private xarray internals.
+    """
+
+    def __init__(self, ds):
+        self._ds = ds
+        self.closed = False
+
+    def __getattr__(self, item):
+        return getattr(self._ds, item)
+
+    def __getitem__(self, item):
+        return self._ds[item]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+        return False
+
+    def close(self):
+        self.closed = True
+        return self._ds.close()
 
 
 def _binary(pattern):
@@ -263,6 +289,130 @@ def test_single_int_accepted(v002_mask):
     np.testing.assert_array_equal(qmask, _expected_or(v002_mask["array"], [0]))
 
 
+@pytest.mark.parametrize("bad", [True, False, np.bool_(True), np.bool_(False)])
+def test_bool_index_rejected(v002_mask, bad):
+    # bool is a subclass of int; it must not be accepted as a band index.
+    with pytest.raises(ValueError):
+        quality_mask(v002_mask["path"], [bad])
+
+
+def test_bool_scalar_index_rejected(v002_mask):
+    with pytest.raises(ValueError):
+        quality_mask(v002_mask["path"], True)
+
+
+def test_axis_metadata_mismatch_raises(tmp_path):
+    # 'mask' has 11 bands but 'mask_bands' lists only 8 -> inconsistent layout.
+    path = str(tmp_path / "mismatch.nc")
+    root = xr.Dataset(
+        {"mask": (("downtrack", "crosstrack", "bands"), np.zeros((3, 4, 11), "float32"))}
+    )
+    root.to_netcdf(path, engine="h5netcdf")
+    sbp = xr.Dataset({"mask_bands": (("mask_band",), np.array(V001_MASK_BANDS))})
+    sbp.to_netcdf(path, engine="h5netcdf", group="sensor_band_parameters", mode="a")
+    with pytest.raises(ValueError):
+        quality_mask(path, [0])
+
+
+# --- Non-finite (fill / no-data) handling --------------------------------------
+
+def test_flag_nan_pixel_is_masked_not_clear(tmp_path):
+    # A no-data (NaN) pixel in a flag layer must be EXCLUDED (1), never returned
+    # as a clean observation (0). _A[2, 3] is 0 (clear) before we blank it.
+    cloud = _A.copy()
+    cloud[2, 3] = np.nan
+    layers = [cloud, _B, _ZERO, _ZERO, _C, _AOD, _H2O, _D, _PROB, _E, _DIST]
+    arr = np.stack(layers, axis=-1)
+    path = _write_mask_nc(tmp_path / "v002_nan.nc", V002_MASK_BANDS, arr)
+
+    qmask = quality_mask(path, [0])
+    _assert_binary_mask(qmask)
+    assert qmask[2, 3] == 1
+    # The previous `(layer > 0)` logic would have returned 0 (clear) here.
+    assert bool((np.nan_to_num(arr[:, :, 0]) > 0)[2, 3]) is False
+
+
+def test_flag_fillvalue_pixel_is_masked(tmp_path):
+    # Same, but via a declared _FillValue (-9999) as in the real product, which
+    # xarray decodes to NaN on read. _A[1, 0] is 0 (clear) before we blank it.
+    cloud = _A.copy()
+    cloud[1, 0] = -9999.0
+    layers = [cloud, _B, _ZERO, _ZERO, _C, _AOD, _H2O, _D, _PROB, _E, _DIST]
+    arr = np.stack(layers, axis=-1)
+    path = _write_mask_nc(
+        tmp_path / "v002_fill.nc", V002_MASK_BANDS, arr, fill_value=-9999.0
+    )
+
+    qmask = quality_mask(path, [0])
+    _assert_binary_mask(qmask)
+    assert qmask[1, 0] == 1
+
+
+def test_flag_infinite_pixels_are_masked(tmp_path):
+    # Both +Inf and -Inf are non-finite and must be excluded (1). Naive
+    # `layer > 0` would return -Inf as 0 (clear) -- the fail-closed bug.
+    # _A[0, 1] and _A[2, 0] are both 0 (clear) before we blank them.
+    cloud = _A.copy()
+    cloud[0, 1] = np.inf
+    cloud[2, 0] = -np.inf
+    layers = [cloud, _B, _ZERO, _ZERO, _C, _AOD, _H2O, _D, _PROB, _E, _DIST]
+    arr = np.stack(layers, axis=-1)
+    path = _write_mask_nc(tmp_path / "v002_inf.nc", V002_MASK_BANDS, arr)
+
+    qmask = quality_mask(path, [0])
+    _assert_binary_mask(qmask)
+    assert qmask[0, 1] == 1  # +inf excluded
+    assert qmask[2, 0] == 1  # -inf excluded
+
+
+def test_threshold_nan_pixel_is_masked(tmp_path):
+    # A NaN in the probability layer must also be excluded, not clear.
+    # _PROB[0, 0] is 0.30, which is < 0.5 (clear) before we blank it.
+    prob = _PROB.copy()
+    prob[0, 0] = np.nan
+    layers = [_A, _B, _ZERO, _ZERO, _C, _AOD, _H2O, _D, prob, _E, _DIST]
+    arr = np.stack(layers, axis=-1)
+    path = _write_mask_nc(tmp_path / "v002_prob_nan.nc", V002_MASK_BANDS, arr)
+
+    qmask = quality_mask(path, [8], threshold=0.5)
+    _assert_binary_mask(qmask)
+    assert qmask[0, 0] == 1
+    # `(layer >= 0.5)` alone would have returned 0 (clear) here.
+    assert bool((np.nan_to_num(arr[:, :, 8]) >= 0.5)[0, 0]) is False
+
+
+# --- Resource management: opened datasets are closed ---------------------------
+
+def _install_open_spy(monkeypatch):
+    import emit_tools
+
+    real_open = emit_tools.xr.open_dataset
+    spies = []
+
+    def spy_open(*args, **kwargs):
+        spy = _DatasetSpy(real_open(*args, **kwargs))
+        spies.append(spy)
+        return spy
+
+    monkeypatch.setattr(emit_tools.xr, "open_dataset", spy_open)
+    return spies
+
+
+def test_datasets_closed_on_success(v002_mask, monkeypatch):
+    spies = _install_open_spy(monkeypatch)
+    quality_mask(v002_mask["path"], [0, 1])
+    assert len(spies) == 2
+    assert all(s.closed for s in spies)
+
+
+def test_datasets_closed_on_error(v002_mask, monkeypatch):
+    spies = _install_open_spy(monkeypatch)
+    with pytest.raises(ValueError):
+        quality_mask(v002_mask["path"], [8])  # continuous band -> raises inside `with`
+    assert len(spies) == 2
+    assert all(s.closed for s in spies)
+
+
 # --- Optional: verify against a real downloaded granule ------------------------
 
 @pytest.mark.skipif(
@@ -271,11 +421,29 @@ def test_single_int_accepted(v002_mask):
 )
 def test_real_v002_granule():
     fp = os.environ["EMIT_L2A_MASK_V002"]
+
+    # The verified V002 SpecTf layers sit at indices 8, 9, 10.
+    with xr.open_dataset(fp, engine="h5netcdf", group="sensor_band_parameters") as sbp:
+        names = [str(x) for x in np.asarray(sbp["mask_bands"].data).ravel()]
+    assert len(names) == 11
+    assert names[8] == "SpecTf-Cloud Probability"
+    assert names[9] == "SpecTf-Cloud Flag"
+    assert names[10] == "SpecTf-Buffer Distance"
+
     # Binary flags combine into a valid mask.
     qmask = quality_mask(fp, [0, 1, 4])
     _assert_binary_mask(qmask)
+
     # SpecTf-Cloud Probability (index 8) is rejected unless a threshold is given.
     with pytest.raises(ValueError):
         quality_mask(fp, [8])
-    qmask_thr = quality_mask(fp, [8], threshold=0.5)
+
+    # With a threshold, the result equals a directly-computed fail-closed
+    # reference over the decoded probability layer.
+    t = 0.5
+    with xr.open_dataset(fp, engine="h5netcdf") as ds:
+        raw8 = np.asarray(ds["mask"].isel(bands=8).values)
+    reference = np.where(np.isfinite(raw8), raw8 >= t, True).astype(np.uint8)
+    qmask_thr = quality_mask(fp, [8], threshold=t)
     _assert_binary_mask(qmask_thr)
+    np.testing.assert_array_equal(qmask_thr, reference)

@@ -10,10 +10,12 @@ _________________________________________________________________________
 > ### Changed
 >
 > - Made `quality_mask` in `python/modules/emit_tools.py` metadata-driven so it is safe for the EMIT L2A Mask V002 product. It now classifies each requested layer from its `sensor_band_parameters/mask_bands` name and refuses to build a mask from a continuous data layer (`AOD550`, `H2O (g cm-2)`, `SpecTf-Cloud Probability`, `SpecTf-Buffer Distance`). Previously only bands 5 and 6 were hard-coded as data bands, so the new V002 continuous bands were silently treated as flags. A continuous probability layer can be turned into a mask with the new optional `threshold` argument.
+> - Hardened `quality_mask`: non-finite (fill / no-data) pixels are now excluded from the mask (fail-closed) rather than silently returned as clear; the opened datasets are always closed; boolean indices, out-of-range indices, and a band-axis / `mask_bands` length mismatch are rejected with clear errors.
 
 > ### Added
 >
-> - `python/modules/tests/` with pytest regression tests for `quality_mask` covering the V001 (8-band) and V002 (11-band) mask layouts.
+> - `python/modules/tests/` with network-free pytest regression tests for `quality_mask` covering the V001 (8-band) and V002 (11-band) mask layouts, non-finite handling, and resource cleanup, plus a `requirements-test.txt`.
+> - A note in `python/how-tos/How_to_use_EMIT_Quality_data.ipynb` describing the V002 mask layout.
 
 ## 2024-06-17
 

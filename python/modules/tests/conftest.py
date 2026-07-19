@@ -38,5 +38,13 @@ _OPTIONAL_DEPENDENCIES = (
 for _name in _OPTIONAL_DEPENDENCIES:
     try:
         importlib.import_module(_name)
-    except Exception:  # ImportError or any import-time failure
-        sys.modules[_name] = mock.MagicMock()
+    except ModuleNotFoundError as _exc:
+        # Only stub the specific optional dependency that is genuinely absent.
+        # A ModuleNotFoundError naming an unrelated module (e.g. a broken
+        # transitive dependency or an ABI/version mismatch) is re-raised so it is
+        # not silently masked as a passing test run.
+        _missing = _exc.name or ""
+        if _missing == _name or _name.startswith(_missing + "."):
+            sys.modules[_name] = mock.MagicMock()
+        else:
+            raise

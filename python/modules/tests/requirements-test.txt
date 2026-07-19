@@ -1,0 +1,9 @@
+# Dependencies for running the emit_tools unit tests (python/modules/tests).
+# numpy, xarray and h5netcdf are already required by emit_tools itself; pytest is
+# the only additional dependency. The tests are network-free (they synthesize
+# small mask files) and do not require the geospatial stack (GDAL, geopandas,
+# rasterio, ...) that emit_tools imports for its other functions.
+pytest
+numpy
+xarray
+h5netcdf
