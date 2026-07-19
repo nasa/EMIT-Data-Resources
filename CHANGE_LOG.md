@@ -5,6 +5,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 _________________________________________________________________________
 
+## 2026-07-19
+
+> ### Changed
+>
+> - Made `quality_mask` in `python/modules/emit_tools.py` metadata-driven so it is safe for the EMIT L2A Mask V002 product. It now classifies each requested layer from its `sensor_band_parameters/mask_bands` name and refuses to build a mask from a continuous data layer (`AOD550`, `H2O (g cm-2)`, `SpecTf-Cloud Probability`, `SpecTf-Buffer Distance`). Previously only bands 5 and 6 were hard-coded as data bands, so the new V002 continuous bands were silently treated as flags. A continuous probability layer can be turned into a mask with the new optional `threshold` argument.
+
+> ### Added
+>
+> - `python/modules/tests/` with pytest regression tests for `quality_mask` covering the V001 (8-band) and V002 (11-band) mask layouts.
+
 ## 2024-06-17
 
 > ### Added

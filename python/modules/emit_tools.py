@@ -264,33 +264,127 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value=-9999):
     return out_xr
 
 
-def quality_mask(filepath, quality_bands):
+def quality_mask(filepath, quality_bands, threshold=None):
     """
-    This function builds a single layer mask to apply based on the bands selected from an EMIT L2A Mask file.
+    This function builds a single binary mask to apply, based on the flag bands selected from an EMIT L2A Mask file.
+
+    The layers in an EMIT L2A Mask file fall into two categories:
+
+    - binary quality flags (e.g. `Cloud Flag`, `Cirrus Flag`, `Water Flag`,
+      `Spacecraft Flag`, `Dilated Cloud Flag`, `Aggregate Flag`, and, in the
+      V002 product, `SpecTf-Cloud Flag`), whose values are 0 or 1 and which can
+      be OR-combined into a mask, and
+    - continuous data layers (e.g. `AOD550`, `H2O (g cm-2)`, and, in the V002
+      product, `SpecTf-Cloud Probability` and `SpecTf-Buffer Distance`), which
+      are physical quantities, not masks.
+
+    The mask file distinguishes these two categories only through the band
+    *names* stored in `sensor_band_parameters/mask_bands`; there is no separate
+    "is-a-flag" metadata field in either the V001 or the V002 product. Summing a
+    continuous layer and clipping values > 1 to 1, as if it were a flag, silently
+    produces a semantically meaningless mask. This function therefore classifies
+    each requested band from its name and refuses to treat a continuous data
+    layer as a flag. The prior implementation hard-coded bands 5 and 6 (the V001
+    AOD/H2O data bands) as the only non-flag layers, which silently accepted the
+    new V002 continuous bands (`SpecTf-Cloud Probability`, `SpecTf-Buffer
+    Distance`).
 
     Parameters:
     filepath: an EMIT L2A Mask netCDF file.
-    quality_bands: a list of bands (quality flags only) from the mask file that should be used in creation of  mask.
+    quality_bands: an index or list of band indices (quality flags only) from the mask file that should be used in creation of the mask. Indices refer to the order of `sensor_band_parameters/mask_bands`.
+    threshold: optional float in [0, 1]. When provided, a continuous *probability* layer (e.g. `SpecTf-Cloud Probability`) included in `quality_bands` is converted to a binary mask using `probability >= threshold`. Non-probability data layers (AOD, water vapor, buffer distance) are never accepted.
 
     Returns:
-    qmask: a numpy array that can be used with the emit_xarray function to apply a quality mask.
+    qmask: a uint8 numpy array of {0, 1} that can be used with the emit_xarray function to apply a quality mask.
     """
     # Open Dataset
     mask_ds = xr.open_dataset(filepath, engine="h5netcdf")
-    # Open Sensor band Group
+    # Open Sensor band Group, which names every layer in the mask file
     mask_parameters_ds = xr.open_dataset(
         filepath, engine="h5netcdf", group="sensor_band_parameters"
     )
+    band_names = [
+        str(b) for b in np.asarray(mask_parameters_ds["mask_bands"].data).ravel()
+    ]
+    n_bands = len(band_names)
+
+    # Accept a single index or an iterable of indices
+    if isinstance(quality_bands, (int, np.integer)):
+        quality_bands = [quality_bands]
+    quality_bands = list(quality_bands)
+
+    # Validate the requested indices against this file's actual bands
+    for b in quality_bands:
+        if not isinstance(b, (int, np.integer)) or b < 0 or b >= n_bands:
+            raise ValueError(
+                f"quality_bands index {b!r} is out of range for this mask file, "
+                f"which has {n_bands} bands: "
+                f"{[f'{i}: {name}' for i, name in enumerate(band_names)]}"
+            )
+
+    if threshold is not None and not (0.0 <= float(threshold) <= 1.0):
+        raise ValueError(f"threshold must be within [0, 1]; got {threshold!r}")
+
     # Print Flags used
-    flags_used = mask_parameters_ds["mask_bands"].data[quality_bands]
+    flags_used = [band_names[b] for b in quality_bands]
     print(f"Flags used: {flags_used}")
-    # Check for data bands and build mask
-    if any(x in quality_bands for x in [5, 6]):
-        err_str = f"Selected flags include a data band (5 or 6) not just flag bands"
-        raise AttributeError(err_str)
+
+    def _is_flag(name):
+        # Binary quality-flag layers are named "... Flag" in both V001 and V002.
+        return name.strip().lower().endswith("flag")
+
+    def _is_probability(name):
+        return "probability" in name.lower()
+
+    flag_band_hint = [
+        f"{i}: {name}" for i, name in enumerate(band_names) if _is_flag(name)
+    ]
+
+    # Build one binary layer per requested band
+    layers = []
+    for b in quality_bands:
+        name = band_names[b]
+        layer = mask_ds["mask"][:, :, b].values
+        if _is_flag(name):
+            # Defense in depth: a flag layer must be binary. Never silently clip.
+            finite = layer[np.isfinite(layer)]
+            uniq = np.unique(finite)
+            if uniq.size and not np.all(np.isin(uniq, (0.0, 1.0))):
+                raise ValueError(
+                    f"Band {b} ('{name}') is named as a flag but contains non-binary "
+                    f"values (e.g. {uniq[:5]}); refusing to build a mask from it."
+                )
+            layers.append((layer > 0).astype(np.uint8))
+        elif _is_probability(name) and threshold is not None:
+            layers.append((layer >= float(threshold)).astype(np.uint8))
+        else:
+            # Continuous / data band: refuse rather than silently clip it to {0, 1}.
+            hint = ""
+            if _is_probability(name):
+                hint = (
+                    " Pass threshold=<value in [0, 1]> to convert this probability "
+                    "layer into a binary mask (probability >= threshold)."
+                )
+            raise ValueError(
+                f"Band {b} ('{name}') is a continuous data layer, not a binary "
+                f"quality flag, so it cannot be combined into a mask.{hint} "
+                f"Flag bands available in this file: {flag_band_hint}."
+            )
+
+    # Combine the binary layers. Logical OR reproduces the previous
+    # sum-then-clip behavior exactly for binary flags.
+    if layers:
+        qmask = np.zeros_like(layers[0])
+        for layer in layers:
+            qmask |= layer
     else:
-        qmask = np.sum(mask_ds["mask"][:, :, quality_bands].values, axis=-1)
-        qmask[qmask > 1] = 1
+        qmask = np.zeros(mask_ds["mask"].shape[:2], dtype=np.uint8)
+    qmask[qmask > 1] = 1
+
+    # The returned mask must be binary; fail loudly if that invariant is broken.
+    assert set(int(v) for v in np.unique(qmask)).issubset(
+        {0, 1}
+    ), "quality_mask produced a non-binary mask"
     return qmask
 
 
