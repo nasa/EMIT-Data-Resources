@@ -264,33 +264,156 @@ def ortho_xr(ds, GLT_NODATA_VALUE=0, fill_value=-9999):
     return out_xr
 
 
-def quality_mask(filepath, quality_bands):
+def quality_mask(filepath, quality_bands, threshold=None):
     """
-    This function builds a single layer mask to apply based on the bands selected from an EMIT L2A Mask file.
+    This function builds a single binary mask to apply, based on the flag bands selected from an EMIT L2A Mask file.
+
+    The layers in an EMIT L2A Mask file fall into two categories:
+
+    - binary quality flags (e.g. `Cloud Flag`, `Cirrus Flag`, `Water Flag`,
+      `Spacecraft Flag`, `Dilated Cloud Flag`, `Aggregate Flag`, and, in the
+      V002 product, `SpecTf-Cloud Flag`), whose values are 0 or 1 and which can
+      be OR-combined into a mask, and
+    - continuous data layers (e.g. `AOD550`, `H2O (g cm-2)`, and, in the V002
+      product, `SpecTf-Cloud Probability` and `SpecTf-Buffer Distance`), which
+      are physical quantities, not masks.
+
+    The mask file distinguishes these two categories only through the band
+    *names* stored in `sensor_band_parameters/mask_bands`; there is no separate
+    "is-a-flag" metadata field in either the V001 or the V002 product. Summing a
+    continuous layer and clipping values > 1 to 1, as if it were a flag, silently
+    produces a semantically meaningless mask. This function therefore classifies
+    each requested band from its name and refuses to treat a continuous data
+    layer as a flag. The prior implementation hard-coded bands 5 and 6 (the V001
+    AOD/H2O data bands) as the only non-flag layers, which silently accepted the
+    new V002 continuous bands (`SpecTf-Cloud Probability`, `SpecTf-Buffer
+    Distance`).
+
+    V002 note: the L2A Mask V002 product has 11 bands (7 flags + 4 data layers)
+    and the flag ordering differs from V001, so band indices are not portable
+    between versions. Inspect `sensor_band_parameters/mask_bands` for the file at
+    hand (e.g. `print(xr.open_dataset(fp, group="sensor_band_parameters").mask_bands.values)`)
+    rather than hard-coding indices. `SpecTf-Cloud Probability` requires the
+    `threshold` argument; `SpecTf-Buffer Distance`, `AOD550` and `H2O` are data
+    layers and are rejected.
+
+    Non-finite handling: the `mask` variable declares a `_FillValue` (-9999) that
+    xarray decodes to NaN, so a layer can contain non-finite (no-data) pixels.
+    Because a no-data pixel is not a clean observation, the mask is built
+    fail-closed: any non-finite value is excluded (mask = 1), never returned as 0
+    (clear).
 
     Parameters:
     filepath: an EMIT L2A Mask netCDF file.
-    quality_bands: a list of bands (quality flags only) from the mask file that should be used in creation of  mask.
+    quality_bands: an integer index or list of band indices (quality flags only) from the mask file that should be used in creation of the mask. Indices refer to the order of `sensor_band_parameters/mask_bands`.
+    threshold: optional float in [0, 1]. When provided, a continuous *probability* layer (e.g. `SpecTf-Cloud Probability`) included in `quality_bands` is converted to a binary mask using `probability >= threshold`. Non-probability data layers (AOD, water vapor, buffer distance) are never accepted.
 
     Returns:
-    qmask: a numpy array that can be used with the emit_xarray function to apply a quality mask.
+    qmask: a uint8 numpy array of {0, 1} that can be used with the emit_xarray function to apply a quality mask.
     """
-    # Open Dataset
-    mask_ds = xr.open_dataset(filepath, engine="h5netcdf")
-    # Open Sensor band Group
-    mask_parameters_ds = xr.open_dataset(
+    # Open the mask dataset and the sensor band group (which names every layer)
+    # in a context manager so both file handles are always closed, including on
+    # error. ``qmask`` is a detached numpy array, so closing the files is safe.
+    with xr.open_dataset(filepath, engine="h5netcdf") as mask_ds, xr.open_dataset(
         filepath, engine="h5netcdf", group="sensor_band_parameters"
-    )
-    # Print Flags used
-    flags_used = mask_parameters_ds["mask_bands"].data[quality_bands]
-    print(f"Flags used: {flags_used}")
-    # Check for data bands and build mask
-    if any(x in quality_bands for x in [5, 6]):
-        err_str = f"Selected flags include a data band (5 or 6) not just flag bands"
-        raise AttributeError(err_str)
-    else:
-        qmask = np.sum(mask_ds["mask"][:, :, quality_bands].values, axis=-1)
-        qmask[qmask > 1] = 1
+    ) as mask_parameters_ds:
+        band_names = [
+            str(b) for b in np.asarray(mask_parameters_ds["mask_bands"].data).ravel()
+        ]
+        n_bands = len(band_names)
+
+        # Guard against a layout where the band axis and the band-name list
+        # disagree, instead of silently mis-slicing or raising a later IndexError.
+        mask_var = mask_ds["mask"]
+        if mask_var.ndim != 3 or mask_var.shape[-1] != n_bands:
+            raise ValueError(
+                f"Unexpected mask layout: 'mask' has shape {tuple(mask_var.shape)} "
+                f"but 'sensor_band_parameters/mask_bands' lists {n_bands} bands; "
+                f"expected the last axis to index the mask bands "
+                f"(dims (downtrack, crosstrack, bands))."
+            )
+        band_dim = mask_var.dims[-1]
+
+        # Accept a single index or an iterable of indices
+        if isinstance(quality_bands, (int, np.integer, bool, np.bool_)):
+            quality_bands = [quality_bands]
+        quality_bands = list(quality_bands)
+
+        # Validate the requested indices. Reject bool explicitly: bool is a
+        # subclass of int and would otherwise be used as a boolean index.
+        for b in quality_bands:
+            if isinstance(b, (bool, np.bool_)) or not isinstance(b, (int, np.integer)):
+                raise ValueError(
+                    f"quality_bands must contain integer band indices; got {b!r} "
+                    f"of type {type(b).__name__}."
+                )
+            if b < 0 or b >= n_bands:
+                raise ValueError(
+                    f"quality_bands index {int(b)} is out of range for this mask "
+                    f"file, which has {n_bands} bands: "
+                    f"{[f'{i}: {name}' for i, name in enumerate(band_names)]}"
+                )
+
+        if threshold is not None and not (0.0 <= float(threshold) <= 1.0):
+            raise ValueError(f"threshold must be within [0, 1]; got {threshold!r}")
+
+        # Print Flags used
+        flags_used = [band_names[b] for b in quality_bands]
+        print(f"Flags used: {flags_used}")
+
+        def _is_flag(name):
+            # Binary quality-flag layers are named "... Flag" in both V001 and V002.
+            return name.strip().lower().endswith("flag")
+
+        def _is_probability(name):
+            return "probability" in name.lower()
+
+        flag_band_hint = [
+            f"{i}: {name}" for i, name in enumerate(band_names) if _is_flag(name)
+        ]
+
+        # Combine one binary layer per requested band. Non-finite (fill / no-data)
+        # values are always excluded (mask = 1), never returned as 0 (clear), in
+        # both the flag and threshold paths.
+        qmask = None
+        for b in quality_bands:
+            name = band_names[b]
+            layer = mask_var.isel({band_dim: b}).values
+            finite = np.isfinite(layer)
+            if _is_flag(name):
+                # Defense in depth: a flag layer's finite values must be binary.
+                finite_vals = np.unique(layer[finite])
+                if finite_vals.size and not np.all(np.isin(finite_vals, (0.0, 1.0))):
+                    raise ValueError(
+                        f"Band {b} ('{name}') is named as a flag but contains "
+                        f"non-binary values (e.g. {finite_vals[:5]}); refusing to "
+                        f"build a mask from it."
+                    )
+                binary = np.where(finite, layer > 0, True).astype(np.uint8)
+            elif _is_probability(name) and threshold is not None:
+                binary = np.where(
+                    finite, layer >= float(threshold), True
+                ).astype(np.uint8)
+            else:
+                # Continuous / data band: refuse rather than silently clip to {0, 1}.
+                hint = ""
+                if _is_probability(name):
+                    hint = (
+                        " Pass threshold=<value in [0, 1]> to convert this probability "
+                        "layer into a binary mask (probability >= threshold)."
+                    )
+                raise ValueError(
+                    f"Band {b} ('{name}') is a continuous data layer, not a binary "
+                    f"quality flag, so it cannot be combined into a mask.{hint} "
+                    f"Flag bands available in this file: {flag_band_hint}."
+                )
+            # Incremental OR keeps the result strictly {0, 1} by construction.
+            qmask = binary if qmask is None else (qmask | binary)
+
+        if qmask is None:
+            # No bands requested: nothing is masked.
+            qmask = np.zeros(mask_var.shape[:2], dtype=np.uint8)
+
     return qmask
 
 
